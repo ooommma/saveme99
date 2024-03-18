@@ -7,11 +7,10 @@ export class AppService {
   }
 }
 
-
 /**
  * 1. 12345 5 -> 3
  * order : 5 ->  order : 3
- * 3 >= 
+ * 3 >=
  * 1씩 다 더해준다
- * 
+ *
  */
