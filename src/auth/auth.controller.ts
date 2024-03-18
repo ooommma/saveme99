@@ -11,12 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UserLoginDto } from './dto/log-in-dto';
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/get-user.decorator';
-import { User } from './entities/auth.entity';
+import { Users } from '../user/entities/users.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -43,24 +43,9 @@ export class AuthController {
     });
     res.status(200).json({ message: '로그인 성공' });
   }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
-  findOne(@GetUser() user: User) {
+  findOne(@GetUser() user: Users) {
     return user;
-  }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-  //   return this.authService.update(+id, updateAuthDto);
-  // }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
   }
 }

@@ -1,21 +1,23 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/auth.entity';
+import { Users } from '../user/entities/users.entity';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from './dto/update-auth.dto';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { hash, compare } from 'bcrypt';
 import { UserLoginDto } from './dto/log-in-dto';
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(Users)
+    private userRepository: Repository<Users>,
     private jwtService: JwtService,
+    private userService: UserService,
   ) {}
   async createUser(createUserDto: CreateUserDto) {
     const { email, password } = createUserDto;
@@ -33,14 +35,12 @@ export class AuthService {
 
   async logIn(userLoginDto: UserLoginDto, res: Response) {
     const { email, password } = userLoginDto;
-    const user = await this.findUserByEmailWithPassword(email);
+    const user = await this.userService.findUserByEmailWithPassword(email);
     //유저가 있다면 비밀번호 검증
-    console.log(user);
-    if (!compare(password, user.password)) {
+    if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 다시 확인해주세요.');
     }
     const payload: object = { userId: user.userId };
-    console.log(payload);
     const accessToken = this.jwtService.sign(payload, { expiresIn: 1000 * 60 * 60 });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: 1000 * 60 * 60 * 24 * 7 });
     return { accessToken, refreshToken };
@@ -48,21 +48,6 @@ export class AuthService {
 
   findAll() {
     return `This action returns all auth`;
-  }
-
-  async findUserByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({ email });
-    if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
-    return user;
-  }
-
-  async findUserByEmailWithPassword(email: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { email },
-      select: ['email', 'password', 'userId'],
-    });
-    if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
-    return user;
   }
 
   update(id: number, updateAuthDto: UpdateUserDto) {
