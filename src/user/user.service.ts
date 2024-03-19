@@ -1,20 +1,40 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+  forwardRef,
+} from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { Users } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(Users)
     private userRepository: Repository<Users>,
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
   ) {}
-  async updateUser(updateUserDto: UpdateUserDto, user: Users, userId: number): Promise<Users> {
-    const findUser = await this.findUserById(userId);
+  async updateUser(
+    updateUserDto: UpdateUserDto,
+    user: Users,
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<Users> {
+    const findUser: Users = await this.findUserById(userId);
+    const { name, profileImg } = findUser;
+
     if (findUser.userId !== user.userId) {
       throw new UnauthorizedException('수정할 권한이 없습니다.');
+    }
+    if (name === updateUserDto.name) {
+      throw new ConflictException('동일한 닉네임으로 변경할 수 없습니다.');
     }
     //Dto에 명시된 값 중 undefined인 값을 필터링
     const filteredDto = Object.entries(updateUserDto).reduce((acc, [key, value]) => {
@@ -23,10 +43,17 @@ export class UserService {
       }
       return acc;
     }, {});
-    //기존에 찾아온 user데이터에 필터링된 값만 덮어씌움
-    const updateData = { ...findUser, ...filteredDto };
+    //파일을 첨부하지 않았을 경우의 기존 이미지
+    let imageUrl = profileImg;
+
+    if (file) {
+      const uploadedImageUrl = await this.authService.saveImage(file);
+      imageUrl = uploadedImageUrl.imageUrl;
+    }
+    const updatedData = { ...findUser, ...filteredDto, profileImg: imageUrl };
+
     try {
-      const updatedUser = await this.userRepository.save(updateData);
+      const updatedUser = await this.userRepository.save(updatedData);
       return updatedUser;
     } catch {
       throw new InternalServerErrorException('사용자 정보 수정에 실패했습니다.');

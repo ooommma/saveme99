@@ -1,4 +1,11 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  forwardRef,
+} from '@nestjs/common';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from '../user/entities/users.entity';
@@ -19,9 +26,10 @@ export class AuthService {
   constructor(
     @InjectRepository(Users)
     private userRepository: Repository<Users>,
-    private jwtService: JwtService,
+    @Inject(forwardRef(() => UserService))
     private userService: UserService,
     private awsService: AwsService,
+    private jwtService: JwtService,
     private utilsService: UtilsService,
   ) {}
   async createUser(createUserDto: CreateUserDto, file: Express.Multer.File) {
@@ -37,7 +45,7 @@ export class AuthService {
       imageUrl = process.env.DEFAULT_PROFILE_IMG;
     } else {
       const uploadedImage = await this.saveImage(file);
-      imageUrl = uploadedImage.imageUrl;
+      // imageUrl = uploadedImage.imageUrl;
     }
     const createdUser = await this.userRepository.save({
       ...createUserDto,
@@ -60,6 +68,7 @@ export class AuthService {
   }
 
   async saveImage(file: Express.Multer.File) {
+    console.log(file);
     return await this.imageUpload(file);
   }
 
