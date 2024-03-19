@@ -9,6 +9,9 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  UseInterceptors,
+  HttpCode,
+  UploadedFile,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -17,14 +20,17 @@ import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/get-user.decorator';
 import { Users } from '../user/entities/users.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(201)
   @Post('/register')
-  async signUp(@Body() createAuthDto: CreateUserDto) {
-    return await this.authService.createUser(createAuthDto);
+  async signUp(@Body() createAuthDto: CreateUserDto, @UploadedFile() file: Express.Multer.File) {
+    return await this.authService.createUser(createAuthDto, file);
   }
 
   @Post('/login')

@@ -8,6 +8,8 @@ import { CardModule } from './card/card.module';
 import { AuthModule } from './auth/auth.module';
 import { Users } from './user/entities/users.entity';
 import { UserModule } from './user/user.module';
+import { AwsModule } from './aws/aws.module';
+import { UtilsModule } from './utils/utils.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -40,6 +42,8 @@ const typeOrmModuleOptions = {
     CardModule,
     AuthModule,
     UserModule,
+    AwsModule,
+    UtilsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

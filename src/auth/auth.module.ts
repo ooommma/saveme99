@@ -8,6 +8,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.startegy';
 import { UserModule } from 'src/user/user.module';
+import { AwsModule } from 'src/aws/aws.module';
+import { UtilsModule } from 'src/utils/utils.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { UserModule } from 'src/user/user.module';
     }),
     TypeOrmModule.forFeature([Users]),
     UserModule,
+    AwsModule,
+    UtilsModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
