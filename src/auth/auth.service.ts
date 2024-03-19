@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { AwsService } from 'src/aws/aws.service';
 import { UtilsService } from 'src/utils/utils.service';
+import { UserDto } from 'src/user/dto/user-dto';
 
 @Injectable()
 export class AuthService {
@@ -24,24 +25,31 @@ export class AuthService {
     private utilsService: UtilsService,
   ) {}
   async createUser(createUserDto: CreateUserDto, file: Express.Multer.File) {
-    console.log(file);
     const { email, password } = createUserDto;
     const user = await this.userRepository.findOneBy({ email });
     if (user) {
       throw new ConflictException('이미 회원가입한 이메일입니다.');
     }
     const hashedPassword = await hash(password, 10);
-    const userDao = await this.userRepository.save({
+    //파일이 있을경우 s3에 저장하고 url 반환, 아니라면 기본 이미지 사용
+    let imageUrl: string;
+    if (!file) {
+      imageUrl = process.env.DEFAULT_PROFILE_IMG;
+    } else {
+      const uploadedImage = await this.saveImage(file);
+      imageUrl = uploadedImage.imageUrl;
+    }
+    const createdUser = await this.userRepository.save({
       ...createUserDto,
       password: hashedPassword,
+      profileImg: imageUrl,
     });
-    return userDao;
+    return new UserDto(createdUser);
   }
 
   async logIn(userLoginDto: UserLoginDto, res: Response) {
     const { email, password } = userLoginDto;
     const user = await this.userService.findUserByEmailWithPassword(email);
-    //유저가 있다면 비밀번호 검증
     if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 다시 확인해주세요.');
     }
