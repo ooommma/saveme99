@@ -10,7 +10,7 @@ export class Columns {
     @Column({unsigned : true})
     boardId : number;
 
-    @Column({unique: true ,unsigned: true})
+    @Column({unsigned: true})
     @IsNumber()
     order : number;
     

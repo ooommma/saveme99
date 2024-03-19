@@ -36,6 +36,7 @@ export class ColumnController {
     return {
       statusCode: HttpStatus.OK,
       message: "컬럼 수정",
+      column
     }
   }
 
@@ -47,6 +48,7 @@ export class ColumnController {
     return {
       statusCode: HttpStatus.OK,
       message: "컬럼이 삭제되었습니다",
+      column
     }
   }
 }
