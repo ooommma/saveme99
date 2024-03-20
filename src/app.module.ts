@@ -13,17 +13,20 @@ import { AwsModule } from './aws/aws.module';
 import { UtilsModule } from './utils/utils.module';
 import { ColumnModule } from './column/column.module';
 import { Columns } from './column/entities/column.entity';
+import { Cards } from './card/entities/card.entity';
 
 const typeOrmModuleOptions = {
-  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
+  useFactory: async (
+    configService: ConfigService,
+  ): Promise<TypeOrmModuleOptions> => ({
     type: 'mysql',
     host: configService.get<string>('DB_HOST'),
-    port: configService.get('DB_PORT'),
+
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
 
-    entities: [Users, Columns],
+    entities: [Users, Cards, Columns],
 
     synchronize: configService.get('DB_SYNC'),
   }),

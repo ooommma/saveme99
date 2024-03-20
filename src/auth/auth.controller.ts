@@ -35,13 +35,20 @@ export class AuthController {
 
   @Post('/login')
   async logIn(@Body() UserLoginDto: UserLoginDto, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.logIn(UserLoginDto, res);
+    const { accessToken, refreshToken } = await this.authService.logIn(
+      UserLoginDto,
+      res,
+    );
     if (!accessToken || !refreshToken) {
       throw new UnauthorizedException();
     }
     const BearerAccessToken = `Bearer ${accessToken}`;
     const BearerRefreshToken = `Bearer ${refreshToken}`;
-    res.cookie('authorization', BearerAccessToken, { maxAge: 1000 * 60 * 60, httpOnly: true, sameSite: true });
+    res.cookie('authorization', BearerAccessToken, {
+      maxAge: 1000 * 60 * 60,
+      httpOnly: true,
+      sameSite: true,
+    });
     res.cookie('refreshToken', BearerRefreshToken, {
       maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,

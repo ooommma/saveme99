@@ -66,8 +66,13 @@ export class AuthService {
       throw new UnauthorizedException('비밀번호를 다시 확인해주세요.');
     }
     const payload: object = { userId: user.userId };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: 1000 * 60 * 60 });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: 1000 * 60 * 60 * 24 * 7 });
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: 1000 * 60 * 60,
+    });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: 1000 * 60 * 60 * 24 * 7,
+    });
     return { accessToken, refreshToken };
   }
 
@@ -80,7 +85,11 @@ export class AuthService {
 
     const ext = file.originalname.split('.').pop();
 
-    const imageUrl = await this.awsService.imageUploadToS3(`${imageName}.${ext}`, file, ext);
+    const imageUrl = await this.awsService.imageUploadToS3(
+      `${imageName}.${ext}`,
+      file,
+      ext,
+    );
     return { imageUrl };
   }
 }

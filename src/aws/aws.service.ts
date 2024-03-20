@@ -16,7 +16,11 @@ export class AwsService {
     });
   }
 
-  async imageUploadToS3(fileName: string, file: Express.Multer.File, ext: string) {
+  async imageUploadToS3(
+    fileName: string,
+    file: Express.Multer.File,
+    ext: string,
+  ) {
     //AWS S3에 이미지 업로드 실행
     const command = new PutObjectCommand({
       Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // 버켓 이름
@@ -29,7 +33,9 @@ export class AwsService {
     try {
       await this.s3Client.send(command);
     } catch {
-      throw new InternalServerErrorException('이미지 저장 중 오류가 발생했습니다.');
+      throw new InternalServerErrorException(
+        '이미지 저장 중 오류가 발생했습니다.',
+      );
     }
 
     return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileName}`;
