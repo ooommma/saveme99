@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Columns } from './entities/column.entity';
-import { LessThan, MoreThan, Repository } from 'typeorm';
+
+import { Between, LessThan, MoreThan, Not, Repository } from 'typeorm';
+
 import _ from 'lodash';
 
 @Injectable()
@@ -54,7 +61,7 @@ export class ColumnService {
 
     if (newOrder < currentOrder) {
       const columnsToUpdate = await this.columnRepository.find({
-        where: { order: MoreThan(newOrder - 1) },
+        where: { order: Between(newOrder, currentOrder - 1) },
         order: { order: 'ASC' },
       });
 
@@ -64,9 +71,9 @@ export class ColumnService {
           await this.columnRepository.save(column);
         }),
       );
-    } else {
+    } else if (newOrder > currentOrder) {
       const columnsToUpdate = await this.columnRepository.find({
-        where: { order: LessThan(newOrder + 1) },
+        where: { order: Between(currentOrder + 1, newOrder) },
         order: { order: 'DESC' },
       });
 
@@ -107,10 +114,10 @@ export class ColumnService {
       }),
     );
 
-    const deletecolumn = await this.columnRepository.delete({ id });
+    await this.columnRepository.delete({ id });
 
     const count = await this.columnRepository.count();
 
-    return { deletecolumn, count };
+    return { findcolumn, count };
   }
 }

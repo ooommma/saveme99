@@ -1,51 +1,72 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/auth.entity';
+import { Users } from '../user/entities/users.entity';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from './dto/update-auth.dto';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { hash, compare } from 'bcrypt';
 import { UserLoginDto } from './dto/log-in-dto';
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
+import { AwsService } from 'src/aws/aws.service';
+import { UtilsService } from 'src/utils/utils.service';
+import { UserDto } from 'src/user/dto/user-dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(Users)
+    private userRepository: Repository<Users>,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
+    private awsService: AwsService,
     private jwtService: JwtService,
+    private utilsService: UtilsService,
+    //싱글톤
+    //외부의 모듈에서 생성하는 서비스의 메서드는 최대한 가져오지 않는게 좋다
   ) {}
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto, file: Express.Multer.File) {
     const { email, password } = createUserDto;
-    const user = await this.userRepository.findOneBy({ email });
+    const user: Users | null = await this.userRepository.findOneBy({ email });
     if (user) {
       throw new ConflictException('이미 회원가입한 이메일입니다.');
     }
     const hashedPassword = await hash(password, 10);
-    const userDao = await this.userRepository.save({
+    //파일이 있을경우 s3에 저장하고 url 반환, 아니라면 기본 이미지 사용
+    let imageUrl: string;
+    if (!file) {
+      imageUrl = process.env.DEFAULT_PROFILE_IMG;
+    } else {
+      const uploadedImage = await this.saveImage(file);
+      imageUrl = uploadedImage.imageUrl;
+    }
+
+    const createdUser = await this.userRepository.save({
       ...createUserDto,
       password: hashedPassword,
+      profileImg: imageUrl,
     });
-    return userDao;
+
+    return new UserDto(createdUser);
   }
 
   async logIn(userLoginDto: UserLoginDto, res: Response) {
     const { email, password } = userLoginDto;
-    const user = await this.findUserByEmailWithPassword(email);
-    //유저가 있다면 비밀번호 검증
-    console.log(user);
-    if (!compare(password, user.password)) {
+    const user = await this.userService.findUserByEmailWithPassword(email);
+    if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 다시 확인해주세요.');
     }
     const payload: object = { userId: user.userId };
-    console.log(payload);
+
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: 1000 * 60 * 60,
     });
@@ -55,36 +76,20 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async saveImage(file: Express.Multer.File) {
+    return await this.imageUpload(file);
   }
 
-  async findUserByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({ email });
-    if (!user)
-      throw new NotFoundException(
-        `${email}에 해당하는 유저를 찾을 수 없습니다.`,
-      );
-    return user;
-  }
+  async imageUpload(file: Express.Multer.File) {
+    const imageName = this.utilsService.getUUID();
 
-  async findUserByEmailWithPassword(email: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { email },
-      select: ['email', 'password', 'userId'],
-    });
-    if (!user)
-      throw new NotFoundException(
-        `${email}에 해당하는 유저를 찾을 수 없습니다.`,
-      );
-    return user;
-  }
+    const ext = file.originalname.split('.').pop();
 
-  update(id: number, updateAuthDto: UpdateUserDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    const imageUrl = await this.awsService.imageUploadToS3(
+      `${imageName}.${ext}`,
+      file,
+      ext,
+    );
+    return { imageUrl };
   }
 }

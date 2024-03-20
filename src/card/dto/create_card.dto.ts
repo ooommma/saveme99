@@ -19,7 +19,7 @@ export class CreateCardDto {
 
   @IsDateString()
   @IsNotEmpty({ message: '마감일을 입력해주세요.' })
-  endDate: Date;
+  endDate: string;
 
   @IsEnum(ColorStatus)
   color: ColorStatus;
