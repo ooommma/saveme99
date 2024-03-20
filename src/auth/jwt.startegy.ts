@@ -1,4 +1,4 @@
-import { Injectable, Req, Request, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, Req, Request, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { Request as RequestType } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { Users } from '../user/entities/users.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -14,6 +16,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private configService: ConfigService,
     @InjectRepository(Users)
     private userRepository: Repository<Users>,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([JwtStrategy.extractJWT, ExtractJwt.fromAuthHeaderAsBearerToken()]),
@@ -31,10 +35,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload) {
     const { userId } = payload;
-    const user: Users = await this.userRepository.findOne({ where: { userId } });
-
+    let user: Users;
+    user = await this.cacheManager.get(`userId:${userId}`);
     if (!user) {
-      throw new UnauthorizedException();
+      user = await this.userRepository.findOne({ where: { userId } });
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+      await this.cacheManager.set(`userId:${userId}`, user);
     }
 
     return user;
