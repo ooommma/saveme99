@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Columns } from './entities/column.entity';
-import { LessThan, MoreThan, Not, Repository } from 'typeorm';
+import { Between, LessThan, MoreThan, Not, Repository } from 'typeorm';
 import _ from 'lodash';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class ColumnService {
 
   async findAll(): Promise<{ columns: Columns[]; count: number }> {
     const [columns, count] = await this.columnRepository.findAndCount({
-      select: ["id", "boardId","order", "name", "createdAt", "updatedAt"],
+      select: ["id", "boardId", "order", "name", "createdAt", "updatedAt"],
       order: { order: "ASC" }
     });
 
@@ -33,45 +33,46 @@ export class ColumnService {
   }
 
   async update(id: number, updateColumnDto: UpdateColumnDto) {
-    const findcolumn = await this.columnRepository.findOneBy({id});
+    const findcolumn = await this.columnRepository.findOneBy({ id });
 
     const newOrder = updateColumnDto.order;
     const newName = updateColumnDto.name;
-    
+
     const totalCount = await this.columnRepository.count();
 
     if (_.isNil(findcolumn)) {
-        throw new NotFoundException("존재하지 않는 컬럼입니다");
+      throw new NotFoundException("존재하지 않는 컬럼입니다");
     }
 
     if (newOrder > totalCount) {
-        throw new NotFoundException("order의 수가 잘못되었습니다");
+      throw new NotFoundException("order의 수가 잘못되었습니다");
     }
 
     const currentOrder = findcolumn.order;
 
     if (newOrder < currentOrder) {
-        const columnsToUpdate = await this.columnRepository.find({
-            where: { order: MoreThan(newOrder - 1) },
-            order: { order: "ASC" }
-        });
+      const columnsToUpdate = await this.columnRepository.find({
+        where: { order: Between(newOrder, currentOrder -1)},
+        order: { order: "ASC" }
+      });
 
-        await Promise.all(columnsToUpdate.map(async (column) => {
-            column.order += 1;
-            await this.columnRepository.save(column);
-        }));
+      await Promise.all(columnsToUpdate.map(async (column) => {
+        column.order += 1;
+        await this.columnRepository.save(column);
+      }));
     }
 
-    else {
-        const columnsToUpdate = await this.columnRepository.find({
-            where: { order: LessThan(newOrder + 1) },
-            order: { order: "DESC" }
-        });
+    else if (newOrder > currentOrder) {
+      const columnsToUpdate = await this.columnRepository.find({
+        where: { order: Between(currentOrder+1, newOrder ) },
+        order: { order: "DESC" }
+      });
 
-        await Promise.all(columnsToUpdate.map(async (column) => {
-            column.order -= 1;
-            await this.columnRepository.save(column);
-        }));
+      await Promise.all(columnsToUpdate.map(async (column) => {
+        column.order -= 1;
+        await this.columnRepository.save(column);
+      }));
+
     }
 
     findcolumn.name = newName;
@@ -79,7 +80,7 @@ export class ColumnService {
     const updatedColumn = await this.columnRepository.save(findcolumn);
 
     return updatedColumn;
-}
+  }
 
 
   async remove(id: number) {
@@ -92,7 +93,7 @@ export class ColumnService {
     const deleteOrder = findcolumn.order
 
     const allColumns = await this.columnRepository.find({
-      where : {
+      where: {
         order: MoreThan(deleteOrder)
       }
     });
@@ -102,10 +103,10 @@ export class ColumnService {
       await this.columnRepository.save(column);
     }));
 
-    const deletecolumn = await this.columnRepository.delete({id});
+    await this.columnRepository.delete({ id });
 
     const count = await this.columnRepository.count();
 
-    return { deletecolumn, count };
+    return { findcolumn, count };
   }
 }
