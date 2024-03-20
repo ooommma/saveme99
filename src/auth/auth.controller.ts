@@ -51,7 +51,7 @@ export class AuthController {
   }
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
-  findOne(@GetUser() user: Users) {
+  getProfile(@GetUser() user: Users) {
     return user;
   }
 }
