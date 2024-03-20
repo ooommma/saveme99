@@ -31,10 +31,12 @@ export class AuthService {
     private awsService: AwsService,
     private jwtService: JwtService,
     private utilsService: UtilsService,
+    //싱글톤
+    //외부의 모듈에서 생성하는 서비스의 메서드는 최대한 가져오지 않는게 좋다
   ) {}
   async createUser(createUserDto: CreateUserDto, file: Express.Multer.File) {
     const { email, password } = createUserDto;
-    const user = await this.userRepository.findOneBy({ email });
+    const user: Users | null = await this.userRepository.findOneBy({ email });
     if (user) {
       throw new ConflictException('이미 회원가입한 이메일입니다.');
     }
@@ -45,13 +47,15 @@ export class AuthService {
       imageUrl = process.env.DEFAULT_PROFILE_IMG;
     } else {
       const uploadedImage = await this.saveImage(file);
-      // imageUrl = uploadedImage.imageUrl;
+      imageUrl = uploadedImage.imageUrl;
     }
+
     const createdUser = await this.userRepository.save({
       ...createUserDto,
       password: hashedPassword,
       profileImg: imageUrl,
     });
+
     return new UserDto(createdUser);
   }
 
@@ -68,12 +72,12 @@ export class AuthService {
   }
 
   async saveImage(file: Express.Multer.File) {
-    console.log(file);
     return await this.imageUpload(file);
   }
 
   async imageUpload(file: Express.Multer.File) {
     const imageName = this.utilsService.getUUID();
+
     const ext = file.originalname.split('.').pop();
 
     const imageUrl = await this.awsService.imageUploadToS3(`${imageName}.${ext}`, file, ext);

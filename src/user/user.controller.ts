@@ -32,7 +32,7 @@ export class UserController {
     @GetUser() user: Users,
     @Param('userId') userId: number,
     @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<Users> {
     return await this.userService.updateUser(updateUserDto, user, userId, file);
   }
   @UseGuards(AuthGuard('jwt'))

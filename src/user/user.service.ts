@@ -8,7 +8,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateDateColumn } from 'typeorm';
 import { Users } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
@@ -33,6 +33,7 @@ export class UserService {
     if (findUser.userId !== user.userId) {
       throw new UnauthorizedException('수정할 권한이 없습니다.');
     }
+
     if (name === updateUserDto.name) {
       throw new ConflictException('동일한 닉네임으로 변경할 수 없습니다.');
     }
@@ -66,7 +67,7 @@ export class UserService {
       throw new UnauthorizedException('회원탈퇴할 권한이 없습니다.');
     }
 
-    const result = await this.userRepository.delete({ userId });
+    const result: DeleteResult = await this.userRepository.delete({ userId });
     if (result.affected === 0) {
       throw new NotFoundException(`${userId}번 유저가 존재하지 않아 삭제에 실패했습니다.`);
     }
@@ -74,7 +75,6 @@ export class UserService {
   }
 
   async findUserByEmail(email: string): Promise<Users> {
-    console.log(email);
     const user = await this.userRepository.findOneBy({ email });
     if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
     return user;
@@ -102,9 +102,5 @@ export class UserService {
     });
     if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
     return user;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }
