@@ -16,7 +16,7 @@ export class Cards extends BaseEntity {
   @PrimaryGeneratedColumn()
   cardId: number;
 
-  @PrimaryGeneratedColumn()
+  @Column()
   columnId: number;
 
   @Column({ type: 'varchar', nullable: false })
@@ -32,7 +32,7 @@ export class Cards extends BaseEntity {
   worker: number;
 
   @Column({ type: 'timestamp' })
-  end_date: Date;
+  endDate: Date;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

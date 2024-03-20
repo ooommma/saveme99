@@ -1,5 +1,5 @@
 import {
-  IsDate,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsString,
@@ -17,15 +17,10 @@ export class CreateCardDto {
   @IsNotEmpty({ message: '내용을 적어주세요.' })
   description: string;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty({ message: '마감일을 입력해주세요.' })
   endDate: Date;
 
   @IsEnum(ColorStatus)
   color: ColorStatus;
 }
-
-//   name: string;
-//   description: string;
-//   color: string;
-//   endDate: number;

@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/auth.entity';
@@ -41,8 +46,12 @@ export class AuthService {
     }
     const payload: object = { userId: user.userId };
     console.log(payload);
-    const accessToken = this.jwtService.sign(payload, { expiresIn: 1000 * 60 * 60 });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: 1000 * 60 * 60 * 24 * 7 });
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: 1000 * 60 * 60,
+    });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: 1000 * 60 * 60 * 24 * 7,
+    });
     return { accessToken, refreshToken };
   }
 
@@ -52,7 +61,10 @@ export class AuthService {
 
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ email });
-    if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
+    if (!user)
+      throw new NotFoundException(
+        `${email}에 해당하는 유저를 찾을 수 없습니다.`,
+      );
     return user;
   }
 
@@ -61,7 +73,10 @@ export class AuthService {
       where: { email },
       select: ['email', 'password', 'userId'],
     });
-    if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
+    if (!user)
+      throw new NotFoundException(
+        `${email}에 해당하는 유저를 찾을 수 없습니다.`,
+      );
     return user;
   }
 
