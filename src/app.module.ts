@@ -7,6 +7,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CardModule } from './card/card.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/auth.entity';
+import { ColumnModule } from './column/column.module';
+import { Columns } from './column/entities/column.entity';
 import { Cards } from './card/entities/card.entity';
 
 const typeOrmModuleOptions = {
@@ -19,7 +21,9 @@ const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    entities: [User, Cards],
+
+    entities: [User, Cards, Columns],
+
     synchronize: configService.get('DB_SYNC'),
   }),
   inject: [ConfigService],
@@ -41,6 +45,7 @@ const typeOrmModuleOptions = {
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     CardModule,
     AuthModule,
+    ColumnModule,
   ],
   controllers: [AppController],
   providers: [AppService],
