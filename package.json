@@ -43,7 +43,16 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "@types/bcrypt": "^5.0.2",
+    "@types/lodash": "^4.17.0",
+    "@types/multer": "^1.4.11",
+    "@types/papaparse": "^5.3.14",
+    "@types/passport-jwt": "^4.0.1",
+    "lodash": "^4.17.21",
+    "multer": "^1.4.5-lts.1",
+    "papaparse": "^5.4.1",
+    "typeorm-naming-strategies": "^4.1.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

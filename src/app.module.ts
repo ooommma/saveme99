@@ -6,10 +6,13 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CardModule } from './card/card.module';
 import { AuthModule } from './auth/auth.module';
+
 import { Users } from './user/entities/users.entity';
 import { UserModule } from './user/user.module';
 import { AwsModule } from './aws/aws.module';
 import { UtilsModule } from './utils/utils.module';
+import { ColumnModule } from './column/column.module';
+import { Columns } from './column/entities/column.entity';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -19,7 +22,9 @@ const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    entities: [Users],
+
+    entities: [Users, Columns],
+
     synchronize: configService.get('DB_SYNC'),
   }),
   inject: [ConfigService],
@@ -41,9 +46,12 @@ const typeOrmModuleOptions = {
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     CardModule,
     AuthModule,
+
     UserModule,
     AwsModule,
     UtilsModule,
+
+    ColumnModule,
   ],
   controllers: [AppController],
   providers: [AppService],

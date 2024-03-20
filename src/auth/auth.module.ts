@@ -34,5 +34,3 @@ import { UserService } from 'src/user/user.service';
   exports: [PassportModule, AuthService],
 })
 export class AuthModule {}
-
-
