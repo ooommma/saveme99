@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ColorStatus } from '../card_status.enum';
+// import { Columns } from 'src/column/entities/column.entity';
 
 @Entity({ name: 'cards' })
 export class Cards extends BaseEntity {
@@ -40,9 +41,9 @@ export class Cards extends BaseEntity {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  //   @ManyToOne(() => Columns, (Column) => Column.card)
-  //   @JoinColumn({ name: 'columnId' })
-  //   column: Columns;
+  // @ManyToOne(() => Columns, (Column) => Column.cards)
+  // @JoinColumn({ name: 'columnId' })
+  // column: Columns;
 
   //   @OneToMany(() => Comment, (comment) => comment.card)
   //   @JoinColumn({ name: 'commentId' })

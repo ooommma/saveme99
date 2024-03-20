@@ -1,5 +1,5 @@
 import {
-  IsDate,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsString,
@@ -9,7 +9,7 @@ import { ColorStatus } from '../card_status.enum';
 
 export class UpdateCardDto {
   @IsString()
-  @IsNotEmpty({ message: '제목을 입력해주세요' })
+  @IsNotEmpty({ message: '제목을 적어주세요.' })
   name: string;
 
   @IsString()
@@ -17,9 +17,9 @@ export class UpdateCardDto {
   @IsNotEmpty({ message: '내용을 적어주세요.' })
   description: string;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty({ message: '마감일을 입력해주세요.' })
-  endDate: Date;
+  endDate: string;
 
   @IsEnum(ColorStatus)
   color: ColorStatus;
