@@ -20,20 +20,22 @@ export class ColumnService {
     private readonly columnRepository: Repository<Columns>,
   ) {}
 
-  async create(createColumnDto: CreateColumnDto) {
+  async create(boardId: number ,createColumnDto: CreateColumnDto) {
     const { name } = createColumnDto;
     const count = await this.columnRepository.count();
 
     const createcolumn = await this.columnRepository.save({
       name,
       order: count + 1,
+      boardId,
     });
 
     return { createcolumn, count };
   }
 
-  async findAll(): Promise<{ columns: Columns[]; count: number }> {
+  async findAll(boardId: number): Promise<{ columns: Columns[]; count: number }> {
     const [columns, count] = await this.columnRepository.findAndCount({
+      where: {boardId},
       select: ['id', 'boardId', 'order', 'name', 'createdAt', 'updatedAt'],
       order: { order: 'ASC' },
     });
@@ -41,8 +43,10 @@ export class ColumnService {
     return { columns, count };
   }
 
-  async update(id: number, updateColumnDto: UpdateColumnDto) {
-    const findcolumn = await this.columnRepository.findOneBy({ id });
+  async update(boardId: number ,id: number, updateColumnDto: UpdateColumnDto) {
+    const findcolumn = await this.columnRepository.findOne({
+      where : {boardId: boardId, id: id}
+    });
 
     const newOrder = updateColumnDto.order;
     const newName = updateColumnDto.name;
@@ -92,8 +96,10 @@ export class ColumnService {
     return updatedColumn;
   }
 
-  async remove(id: number) {
-    const findcolumn = await this.columnRepository.findOneBy({ id });
+  async remove(boardId: number ,id: number) {
+    const findcolumn = await this.columnRepository.findOne({
+      where: {boardId: boardId, id: id}
+    });
 
     if (_.isNil(findcolumn)) {
       throw new NotFoundException('존재하지 않는 컬럼입니다');

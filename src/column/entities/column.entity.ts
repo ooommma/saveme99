@@ -36,9 +36,9 @@ export class Columns {
   updatedAt: Date;
 
   @ManyToOne(() => Boards , (boards) => boards.columns, {onDelete: "CASCADE"})
-  @JoinColumn({name : "boardId"})
+  // @JoinColumn({name : "boardId"})
   boards : Boards;
 
-  @OneToMany(() => Cards, (card) => card.column)
-  cards: Cards[];
+  // @OneToMany(() => Cards, (card) => card.column)
+  // cards: Cards[];
 }

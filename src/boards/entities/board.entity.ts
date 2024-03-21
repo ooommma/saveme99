@@ -1,3 +1,4 @@
+import { Columns } from 'src/column/entities/column.entity';
 import { Users } from 'src/user/entities/users.entity';
 import {
   Column,
@@ -56,4 +57,7 @@ export class Boards {
   @ManyToMany(() => Users, (user) => user.invitedBoards)
   @JoinTable()
   invitedUsers: Users[];
+
+  @OneToMany(() => Columns, (column) => column.boards, {onDelete: "CASCADE"})
+  columns: Columns[];
 }
