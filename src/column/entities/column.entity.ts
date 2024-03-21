@@ -15,13 +15,13 @@ import {
 
 @Entity({ name: 'columns' })
 export class Columns {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unsigned: true })
+  @Column()
   boardId: number;
 
-  @Column({ unsigned: true })
+  @Column()
   @IsNumber()
   order: number;
 
@@ -35,9 +35,8 @@ export class Columns {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Boards , (boards) => boards.columns, {onDelete: "CASCADE"})
-  @JoinColumn({name : "boardId"})
-  boards : Boards;
+  @ManyToOne(() => Boards, (boards) => boards.columns, { onDelete: 'CASCADE' })
+  boards: Boards;
 
   @OneToMany(() => Cards, (card) => card.column)
   cards: Cards[];

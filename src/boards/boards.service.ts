@@ -72,8 +72,9 @@ export class BoardsService {
 
     if (!findBord) throw new BadRequestException('존재하지 않는 보드입니다.');
 
-    if (findBord.userId !== user.userId)
+    if (findBord.userId !== user.userId) {
       throw new BadRequestException('삭제할 권한이 없습니다.');
+    }
 
     const deleteBoard = await this.boardRepository.delete({ id });
 

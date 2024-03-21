@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+// import { IsString } from 'class-validator';
 import { Boards } from 'src/boards/entities/board.entity';
 import {
   Column,
