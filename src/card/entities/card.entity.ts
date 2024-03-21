@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ColorStatus } from '../card_status.enum';
+import { CardStatus, ColorStatus } from '../types/card_status.enum';
 // import { Columns } from 'src/column/entities/column.entity';
 
 @Entity({ name: 'cards' })
@@ -28,6 +28,9 @@ export class Cards extends BaseEntity {
 
   @Column({ type: 'enum', enum: ColorStatus, default: ColorStatus.RED })
   color: ColorStatus;
+
+  @Column({ type: 'enum', enum: CardStatus, default: CardStatus.STANDBY })
+  status: CardStatus;
 
   @Column({ type: 'bigint', nullable: false })
   worker: number;

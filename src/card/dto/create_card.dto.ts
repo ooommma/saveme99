@@ -5,7 +5,7 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { ColorStatus } from '../card_status.enum';
+import { CardStatus, ColorStatus } from '../types/card_status.enum';
 
 export class CreateCardDto {
   @IsString()
@@ -23,4 +23,7 @@ export class CreateCardDto {
 
   @IsEnum(ColorStatus)
   color: ColorStatus;
+
+  @IsEnum(CardStatus)
+  status: CardStatus;
 }
