@@ -12,8 +12,8 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
-import { GetUser } from 'src/auth/decorator/get-user.decorator';
-import { Users } from 'src/user/entities/users.entity';
+import { GetUser } from '../auth/decorator/get-user.decorator';
+import { Users } from '../user/entities/users.entity';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { InviteDto } from './dto/invite-board.dto';

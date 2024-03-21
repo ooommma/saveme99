@@ -16,8 +16,10 @@ import {
 export class Columns {
   @PrimaryGeneratedColumn()
   id: number;
+
   @Column()
   boardId: number;
+
   @Column()
   @IsNumber()
   order: number;
@@ -28,9 +30,11 @@ export class Columns {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
+
   @ManyToOne(() => Boards, (boards) => boards.column, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'boardId' })
   boards: Boards;
+
   @OneToMany(() => Cards, (card) => card.column)
   cards: Cards[];
 }

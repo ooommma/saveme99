@@ -8,11 +8,14 @@ import {
   Post,
   UseGuards,
   HttpStatus,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { CardService } from './card.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCardDto } from './dto/create_card.dto';
 import { UpdateCardDto } from './dto/update_card.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller(':columnId/cards')
@@ -20,8 +23,11 @@ export class CardController {
   constructor(private cardService: CardService) {}
 
   @Get('')
-  async getAllCards(@Param('columnId') columnId: number) {
-    return await this.cardService.getAllCards(columnId);
+  async getAllCards(
+    @Param('columnId') columnId: number,
+    @Query('orderValue') orderValue: string,
+  ) {
+    return await this.cardService.getAllCards(columnId, orderValue);
   }
 
   @Get(':cardId')
@@ -31,7 +37,6 @@ export class CardController {
   ) {
     return await this.cardService.findOneCards(columnId, cardId);
   }
-
   @Post()
   async createCard(
     @Param('columnId') columnId: number,
@@ -60,5 +65,19 @@ export class CardController {
       message: '카드가 정상적으로 삭제되었습니다.',
       card,
     };
+  }
+
+  @Put(':cardId')
+  async moveCard(
+    @Param('columnId') columnId: number,
+    @Param('cardId') cardId: number,
+    @Body() betweenCards: number[],
+  ) {
+    const updatedCard = await this.cardService.moveCard(
+      columnId,
+      cardId,
+      betweenCards,
+    );
+    return updatedCard;
   }
 }

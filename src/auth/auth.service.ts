@@ -16,10 +16,10 @@ import { UserLoginDto } from './dto/log-in-dto';
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
-import { AwsService } from 'src/aws/aws.service';
-import { UtilsService } from 'src/utils/utils.service';
-import { UserDto } from 'src/user/dto/user-dto';
+import { UserService } from '../user/user.service';
+import { AwsService } from '../aws/aws.service';
+import { UtilsService } from '../utils/utils.service';
+import { UserDto } from '../user/dto/user-dto';
 
 @Injectable()
 export class AuthService {

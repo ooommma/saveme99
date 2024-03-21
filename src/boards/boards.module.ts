@@ -3,8 +3,8 @@ import { BoardsService } from './boards.service';
 import { BoardsController } from './boards.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Boards } from './entities/board.entity';
-import { AuthModule } from 'src/auth/auth.module';
-import { Users } from 'src/user/entities/users.entity';
+import { AuthModule } from '../auth/auth.module';
+import { Users } from '../user/entities/users.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Boards, Users])],
