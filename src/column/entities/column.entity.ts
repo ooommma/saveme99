@@ -1,6 +1,6 @@
 import { IsNumber, IsString } from 'class-validator';
-import { Boards } from 'src/boards/entities/board.entity';
-import { Cards } from 'src/card/entities/card.entity';
+import { Boards } from '../../boards/entities/board.entity';
+import { Cards } from '../../card/entities/card.entity';
 import {
   Column,
   CreateDateColumn,
@@ -12,33 +12,25 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-@Entity({ name: 'columns' })
+@Entity()
 export class Columns {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ unsigned: true })
+  @Column()
   boardId: number;
-
-  @Column({ unsigned: true })
+  @Column()
   @IsNumber()
   order: number;
-
   @IsString()
   @Column({ default: 'Done name' })
   name: string;
-
   @CreateDateColumn()
   createdAt: Date;
-
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToOne(() => Boards , (boards) => boards.columns, {onDelete: "CASCADE"})
-  // @JoinColumn({name : "boardId"})
-  boards : Boards;
-
-  // @OneToMany(() => Cards, (card) => card.column)
-  // cards: Cards[];
+  @ManyToOne(() => Boards, (boards) => boards.column, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'boardId' })
+  boards: Boards;
+  @OneToMany(() => Cards, (card) => card.column)
+  cards: Cards[];
 }
