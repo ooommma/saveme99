@@ -1,19 +1,17 @@
 import { IsNumber, IsString } from 'class-validator';
-import { Boards } from 'src/boards/entities/board.entity';
-import { Cards } from 'src/card/entities/card.entity';
+import { Boards } from '../../boards/entities/board.entity';
+import { Cards } from '../../card/entities/card.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   // Generated,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-@Entity({ name: 'columns' })
+@Entity()
 export class Columns {
   @PrimaryGeneratedColumn()
   id: number;
