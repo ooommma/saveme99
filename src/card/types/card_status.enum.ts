@@ -6,3 +6,9 @@ export enum ColorStatus {
   BLUE = 'BLUE',
   BLACK = 'BLACK',
 }
+
+export enum CardStatus {
+  STANDBY = 'STANDBY',
+  DOING = 'DOING',
+  DONE = 'DONE',
+}
