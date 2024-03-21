@@ -1,12 +1,14 @@
 import { IsNumber, IsString } from 'class-validator';
-// import { Cards } from 'src/card/entities/card.entity';
+import { Boards } from 'src/boards/entities/board.entity';
+import { Cards } from 'src/card/entities/card.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   // Generated,
-  // ManyToOne,
-  // OneToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -33,9 +35,10 @@ export class Columns {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // @ManyToOne((type) : typeof Boards => Boards , boards => boards.columns, {onDelete: "CASCADE"})
-  // boards : Boards;
+  @ManyToOne(() => Boards , (boards) => boards.columns, {onDelete: "CASCADE"})
+  @JoinColumn({name : "boardId"})
+  boards : Boards;
 
-  // @OneToMany((): typeof Cards => Cards, (card) => card.column)
-  // cards: Cards[];
+  @OneToMany(() => Cards, (card) => card.column)
+  cards: Cards[];
 }

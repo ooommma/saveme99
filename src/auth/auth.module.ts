@@ -11,6 +11,7 @@ import { UserModule } from 'src/user/user.module';
 import { AwsModule } from 'src/aws/aws.module';
 import { UtilsModule } from 'src/utils/utils.module';
 import { UserService } from 'src/user/user.service';
+import { Boards } from 'src/boards/entities/board.entity';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt', session: false }),
@@ -24,7 +25,7 @@ import { UserService } from 'src/user/user.service';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Users]),
+    TypeOrmModule.forFeature([Users, Boards]),
     forwardRef(() => UserModule),
     AwsModule,
     UtilsModule,
