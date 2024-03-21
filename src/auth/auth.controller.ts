@@ -29,19 +29,29 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   @Post('/register')
-  async signUp(@Body() createAuthDto: CreateUserDto, @UploadedFile() file: Express.Multer.File) {
+  async signUp(
+    @Body() createAuthDto: CreateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     return await this.authService.createUser(createAuthDto, file);
   }
 
   @Post('/login')
   async logIn(@Body() UserLoginDto: UserLoginDto, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.logIn(UserLoginDto, res);
+    const { accessToken, refreshToken } = await this.authService.logIn(
+      UserLoginDto,
+      res,
+    );
     if (!accessToken || !refreshToken) {
       throw new UnauthorizedException();
     }
     const BearerAccessToken = `Bearer ${accessToken}`;
     const BearerRefreshToken = `Bearer ${refreshToken}`;
-    res.cookie('authorization', BearerAccessToken, { maxAge: 1000 * 60 * 60, httpOnly: true, sameSite: true });
+    res.cookie('authorization', BearerAccessToken, {
+      maxAge: 1000 * 60 * 60,
+      httpOnly: true,
+      sameSite: true,
+    });
     res.cookie('refreshToken', BearerRefreshToken, {
       maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,

@@ -112,7 +112,10 @@ describe('AuthController with AuthGuard true', () => {
 
       const user = await authController.signUp(createUserDto, mockFile);
 
-      expect(mockAuthService.createUser).toHaveBeenCalledWith(createUserDto, mockFile);
+      expect(mockAuthService.createUser).toHaveBeenCalledWith(
+        createUserDto,
+        mockFile,
+      );
       expect(mockAuthService.createUser).toHaveBeenCalledTimes(1);
       expect(user).toEqual(mockUser);
     });
@@ -148,11 +151,15 @@ describe('AuthController with AuthGuard true', () => {
       expect(mockAuthService.logIn).toHaveBeenCalledTimes(1);
       expect(mockAuthService.logIn).toHaveBeenCalledWith(mockUserLoginDto, res);
       expect(res.cookie).toHaveBeenCalledTimes(2);
-      expect(res.cookie).toHaveBeenLastCalledWith('refreshToken', mockBearerRefreshToken, {
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        httpOnly: true,
-        sameSite: true,
-      });
+      expect(res.cookie).toHaveBeenLastCalledWith(
+        'refreshToken',
+        mockBearerRefreshToken,
+        {
+          maxAge: 1000 * 60 * 60 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        },
+      );
       expect(res.status).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledTimes(1);
@@ -171,7 +178,9 @@ describe('AuthController with AuthGuard true', () => {
       };
       mockAuthService.logIn.mockResolvedValue(mockTokens);
 
-      await expect(authController.logIn(mockUserLoginDto, res)).rejects.toThrow(UnauthorizedException);
+      await expect(authController.logIn(mockUserLoginDto, res)).rejects.toThrow(
+        UnauthorizedException,
+      );
 
       expect(mockAuthService.logIn).toHaveBeenCalledTimes(1);
       expect(mockAuthService.logIn).toHaveBeenCalledWith(mockUserLoginDto, res);
