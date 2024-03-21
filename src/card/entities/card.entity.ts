@@ -4,7 +4,6 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  // OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -17,6 +16,8 @@ export class Cards extends BaseEntity {
   cardId: number;
   @Column()
   columnId: number;
+  @Column()
+  userId: number;
   @Column({ type: 'varchar', nullable: false })
   name: string;
   @Column({ type: 'varchar', length: 100, nullable: false })

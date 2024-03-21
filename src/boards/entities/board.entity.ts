@@ -44,6 +44,7 @@ export class Boards {
   deletedAt?: Date;
   @ManyToOne(() => Users, (user) => user.board)
   user: Users;
+
   @ManyToMany(() => Users, (user) => user.invitedBoards)
   @JoinTable()
   invitedUsers: Users[];
