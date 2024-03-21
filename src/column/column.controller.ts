@@ -13,15 +13,18 @@ import { ColumnService } from './column.service';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { number } from 'joi';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('column')
+@Controller(':boardId/column')
 export class ColumnController {
   constructor(private readonly columnService: ColumnService) {}
 
   @Post()
-  async create(@Body() createColumnDto: CreateColumnDto) {
-    const createcolumn = await this.columnService.create(createColumnDto);
+  async create(
+    @Param("boardId") boardId: number,
+    @Body() createColumnDto: CreateColumnDto) {
+    const createcolumn = await this.columnService.create(boardId,createColumnDto);
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -31,8 +34,8 @@ export class ColumnController {
   }
 
   @Get()
-  async findAll() {
-    const column = await this.columnService.findAll();
+  async findAll(@Param("boardId") boardId: number) {
+    const column = await this.columnService.findAll(boardId);
 
     return {
       statusCode: HttpStatus.OK,
@@ -43,10 +46,11 @@ export class ColumnController {
 
   @Patch(':id')
   async update(
+    @Param("boardId") boardId: number,
     @Param('id') id: number,
     @Body() updateColumnDto: UpdateColumnDto,
   ) {
-    const column = await this.columnService.update(id, updateColumnDto);
+    const column = await this.columnService.update(boardId,id, updateColumnDto);
 
     return {
       statusCode: HttpStatus.OK,
@@ -56,8 +60,11 @@ export class ColumnController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number) {
-    const column = await this.columnService.remove(id);
+  async delete(
+    @Param("boardId") boardId: number,
+    @Param('id') id: number
+    ) {
+    const column = await this.columnService.remove(boardId,id);
 
     return {
       statusCode: HttpStatus.OK,

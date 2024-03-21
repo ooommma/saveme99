@@ -12,7 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
 @Entity()
 export class Columns {
   @PrimaryGeneratedColumn()
@@ -24,14 +23,11 @@ export class Columns {
   @Column()
   @IsNumber()
   order: number;
-
   @IsString()
   @Column({ default: 'Done name' })
   name: string;
-
   @CreateDateColumn()
   createdAt: Date;
-
   @UpdateDateColumn()
   updatedAt: Date;
 
