@@ -6,8 +6,8 @@ import { Readable } from 'stream';
 import { Response } from 'express';
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Users } from 'src/user/entities/users.entity';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { Users } from '../user/entities/users.entity';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { validate } from 'class-validator';
 import { error } from 'console';
 import { UserLoginDto } from './dto/log-in-dto';
@@ -58,6 +58,8 @@ const mockUser: Users = {
   profileImg: null,
   createdAt: new Date(),
   updatedAt: new Date(),
+  board: [],
+  invitedBoards: [],
 };
 
 let canActivateVal = true;

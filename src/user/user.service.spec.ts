@@ -4,7 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Readable } from 'stream';
 import { Users } from './entities/users.entity';
 import { Repository } from 'typeorm';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
   ConflictException,
@@ -50,6 +50,8 @@ const mockUser: Users = {
   profileImg: null,
   createdAt: new Date(),
   updatedAt: new Date(),
+  board: [],
+  invitedBoards: [],
 };
 
 const mockUserWithoutPassword = {
@@ -112,14 +114,27 @@ describe('UserService', () => {
       mockAuthService.saveImage = jest.fn().mockResolvedValue({
         imageUrl: 's3 img path',
       });
-      mockUserRepository.save.mockResolvedValue({ ...updatedUser, ...updateUserDto, profileImg: 's3 img path' });
-      const result = await userService.updateUser(updateUserDto, mockUser, mockUser.userId, mockFile);
+      mockUserRepository.save.mockResolvedValue({
+        ...updatedUser,
+        ...updateUserDto,
+        profileImg: 's3 img path',
+      });
+      const result = await userService.updateUser(
+        updateUserDto,
+        mockUser,
+        mockUser.userId,
+        mockFile,
+      );
       expect(userService.findUserById).toHaveBeenCalledTimes(1);
       expect(userService.findUserById).toHaveBeenCalledWith(mockUser.userId);
       expect(mockAuthService.saveImage).toHaveBeenCalledWith(mockFile);
       expect(mockAuthService.saveImage).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ ...updatedUser, ...updateUserDto, profileImg: 's3 img path' });
+      expect(result).toEqual({
+        ...updatedUser,
+        ...updateUserDto,
+        profileImg: 's3 img path',
+      });
     });
     it('success updateUser method without file', async () => {
       userService.findUserById = jest.fn().mockResolvedValue(mockUser);
@@ -129,12 +144,21 @@ describe('UserService', () => {
         ...updateUserDto,
         profileImg: updatedUser.profileImg,
       });
-      const result = await userService.updateUser(updateUserDto, mockUser, mockUser.userId, null);
+      const result = await userService.updateUser(
+        updateUserDto,
+        mockUser,
+        mockUser.userId,
+        null,
+      );
       expect(userService.findUserById).toHaveBeenCalledTimes(1);
       expect(userService.findUserById).toHaveBeenCalledWith(mockUser.userId);
       expect(mockAuthService.saveImage).toHaveBeenCalledTimes(0);
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ ...updatedUser, ...updateUserDto, profileImg: updatedUser.profileImg });
+      expect(result).toEqual({
+        ...updatedUser,
+        ...updateUserDto,
+        profileImg: updatedUser.profileImg,
+      });
     });
     it('updateUser method should be throw error Unauthorized Exception', async () => {
       expect.assertions(5);
@@ -149,7 +173,12 @@ describe('UserService', () => {
       };
       userService.findUserById = jest.fn().mockResolvedValue(updatedUser);
       try {
-        await userService.updateUser(updateUserDto, mockUser, mockUser.userId, null);
+        await userService.updateUser(
+          updateUserDto,
+          mockUser,
+          mockUser.userId,
+          null,
+        );
       } catch (err) {
         expect(err).toBeInstanceOf(UnauthorizedException);
         expect(err.message).toEqual('수정할 권한이 없습니다.');
@@ -190,7 +219,12 @@ describe('UserService', () => {
 
       mockUserRepository.save.mockRejectedValue(new Error('database Error'));
       try {
-        const result = await userService.updateUser(updateUserDto, mockUser, mockUser.userId, null);
+        const result = await userService.updateUser(
+          updateUserDto,
+          mockUser,
+          mockUser.userId,
+          null,
+        );
       } catch (err) {
         expect(err).toBeInstanceOf(InternalServerErrorException);
         expect(err.message).toEqual('사용자 정보 수정에 실패했습니다.');
@@ -246,7 +280,9 @@ describe('UserService', () => {
         await userService.deleteUser(1, mockUser);
       } catch (err) {
         expect(err).toBeInstanceOf(NotFoundException);
-        expect(err.message).toEqual(`1번 유저가 존재하지 않아 삭제에 실패했습니다.`);
+        expect(err.message).toEqual(
+          `1번 유저가 존재하지 않아 삭제에 실패했습니다.`,
+        );
       }
       expect(mockUserRepository.delete).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.delete).toHaveBeenCalledWith({ userId: 1 });
@@ -260,7 +296,9 @@ describe('UserService', () => {
       const result = await userService.findUserByEmail(mockUser.email);
 
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ email: mockUser.email });
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({
+        email: mockUser.email,
+      });
       expect(result).toEqual(mockUserWithoutPassword);
     });
 
@@ -270,11 +308,15 @@ describe('UserService', () => {
         await userService.findUserByEmail(mockUser.email);
       } catch (err) {
         expect(err).toBeInstanceOf(NotFoundException);
-        expect(err.message).toEqual(`${mockUser.email}에 해당하는 유저를 찾을 수 없습니다.`);
+        expect(err.message).toEqual(
+          `${mockUser.email}에 해당하는 유저를 찾을 수 없습니다.`,
+        );
       }
 
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ email: mockUser.email });
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({
+        email: mockUser.email,
+      });
     });
   });
   describe('findUserById', () => {
@@ -283,7 +325,9 @@ describe('UserService', () => {
       const result = await userService.findUserById(mockUser.userId);
 
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ userId: mockUser.userId });
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({
+        userId: mockUser.userId,
+      });
       expect(result).toEqual(mockUserWithoutPassword);
     });
 
@@ -293,22 +337,35 @@ describe('UserService', () => {
         await userService.findUserById(mockUser.userId);
       } catch (err) {
         expect(err).toBeInstanceOf(NotFoundException);
-        expect(err.message).toEqual(`아이디가 ${mockUser.userId}인 유저를 찾을 수 없습니다.`);
+        expect(err.message).toEqual(
+          `아이디가 ${mockUser.userId}인 유저를 찾을 수 없습니다.`,
+        );
       }
 
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ userId: mockUser.userId });
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({
+        userId: mockUser.userId,
+      });
     });
   });
   describe('findUserByIdWithPassword', () => {
     it('success findUserByIdWithPassword', async () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      const result = await userService.findUserByIdWithPassword(mockUser.userId);
+      const result = await userService.findUserByIdWithPassword(
+        mockUser.userId,
+      );
 
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { userId: mockUser.userId },
-        select: ['email', 'password', 'userId', 'createdAt', 'profileImg', 'updatedAt'],
+        select: [
+          'email',
+          'password',
+          'userId',
+          'createdAt',
+          'profileImg',
+          'updatedAt',
+        ],
       });
       expect(result).toEqual(mockUser);
     });
@@ -319,20 +376,31 @@ describe('UserService', () => {
         await userService.findUserByIdWithPassword(mockUser.userId);
       } catch (err) {
         expect(err).toBeInstanceOf(NotFoundException);
-        expect(err.message).toEqual(`아이디가 ${mockUser.userId}인 유저를 찾을 수 없습니다.`);
+        expect(err.message).toEqual(
+          `아이디가 ${mockUser.userId}인 유저를 찾을 수 없습니다.`,
+        );
       }
 
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { userId: mockUser.userId },
-        select: ['email', 'password', 'userId', 'createdAt', 'profileImg', 'updatedAt'],
+        select: [
+          'email',
+          'password',
+          'userId',
+          'createdAt',
+          'profileImg',
+          'updatedAt',
+        ],
       });
     });
   });
   describe('findUserByEmailWithPassword', () => {
     it('success findUserByEmailWithPassword', async () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      const result = await userService.findUserByEmailWithPassword(mockUser.email);
+      const result = await userService.findUserByEmailWithPassword(
+        mockUser.email,
+      );
 
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
@@ -348,7 +416,9 @@ describe('UserService', () => {
         await userService.findUserByEmailWithPassword(mockUser.email);
       } catch (err) {
         expect(err).toBeInstanceOf(NotFoundException);
-        expect(err.message).toEqual(`${mockUser.email}에 해당하는 유저를 찾을 수 없습니다.`);
+        expect(err.message).toEqual(
+          `${mockUser.email}에 해당하는 유저를 찾을 수 없습니다.`,
+        );
       }
 
       expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);

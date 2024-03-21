@@ -1,34 +1,44 @@
-import { IsNumber, IsString } from "class-validator";
-import { Column, CreateDateColumn, Entity, Generated, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { IsNumber, IsString } from 'class-validator';
+import { Boards } from '../../boards/entities/board.entity';
+import { Cards } from '../../card/entities/card.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  // Generated,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity({name: "columns"})
+@Entity()
 export class Columns {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn({unsigned : true})
-    id : number;
+  @Column()
+  boardId: number;
 
-    @Column({unsigned : true})
-    boardId : number;
+  @Column()
+  @IsNumber()
+  order: number;
 
-    @Column({unsigned: true})
-    @IsNumber()
-    order : number;
-    
-    @IsString()
-    @Column({default: "Done name"})
-    name : string;
-    
-    @CreateDateColumn()
-    createdAt : Date;
-    
-    @UpdateDateColumn()
-    updatedAt : Date;
+  @IsString()
+  @Column({ default: 'Done name' })
+  name: string;
 
-    // @ManyToOne((type) : typeof Boards => Boards , boards => boards.columns, {onDelete: "CASCADE"})
-    // boards : Boards;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    // @OneToMany((type) : typeof Card => Card, card => card.colums)
-    // cards : Card[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 
+  @ManyToOne(() => Boards, (boards) => boards.column, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'boardId' })
+  boards: Boards;
 
+  @OneToMany(() => Cards, (card) => card.column)
+  cards: Cards[];
 }

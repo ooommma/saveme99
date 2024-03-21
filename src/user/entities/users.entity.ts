@@ -1,4 +1,14 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { IsString } from 'class-validator';
+import { Boards } from 'src/boards/entities/board.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Users {
@@ -22,4 +32,10 @@ export class Users {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Boards, (board) => board.user)
+  board: Boards[];
+
+  @ManyToMany(() => Boards, (board) => board.invitedUsers)
+  invitedBoards: Boards[];
 }

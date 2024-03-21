@@ -11,7 +11,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { DeleteResult, Repository, UpdateDateColumn } from 'typeorm';
 import { Users } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -38,12 +38,15 @@ export class UserService {
       throw new ConflictException('동일한 닉네임으로 변경할 수 없습니다.');
     }
     //Dto에 명시된 값 중 undefined인 값을 필터링
-    const filteredDto = Object.entries(updateUserDto).reduce((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    const filteredDto = Object.entries(updateUserDto).reduce(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {},
+    );
     //파일을 첨부하지 않았을 경우의 기존 이미지
     let imageUrl = profileImg;
 
@@ -57,7 +60,9 @@ export class UserService {
       const updatedUser = await this.userRepository.save(updatedData);
       return updatedUser;
     } catch {
-      throw new InternalServerErrorException('사용자 정보 수정에 실패했습니다.');
+      throw new InternalServerErrorException(
+        '사용자 정보 수정에 실패했습니다.',
+      );
     }
   }
 
@@ -69,29 +74,47 @@ export class UserService {
 
     const result: DeleteResult = await this.userRepository.delete({ userId });
     if (result.affected === 0) {
-      throw new NotFoundException(`${userId}번 유저가 존재하지 않아 삭제에 실패했습니다.`);
+      throw new NotFoundException(
+        `${userId}번 유저가 존재하지 않아 삭제에 실패했습니다.`,
+      );
     }
     return `${userId}번 유저가 성공적으로 삭제되었습니다.`;
   }
 
   async findUserByEmail(email: string): Promise<Users> {
     const user = await this.userRepository.findOneBy({ email });
-    if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
+    if (!user)
+      throw new NotFoundException(
+        `${email}에 해당하는 유저를 찾을 수 없습니다.`,
+      );
     return user;
   }
 
   async findUserById(userId: number): Promise<Users> {
     const user = await this.userRepository.findOneBy({ userId });
-    if (!user) throw new NotFoundException(`아이디가 ${userId}인 유저를 찾을 수 없습니다.`);
+    if (!user)
+      throw new NotFoundException(
+        `아이디가 ${userId}인 유저를 찾을 수 없습니다.`,
+      );
     return user;
   }
 
   async findUserByIdWithPassword(userId: number): Promise<Users> {
     const user = await this.userRepository.findOne({
       where: { userId },
-      select: ['email', 'password', 'userId', 'createdAt', 'profileImg', 'updatedAt'],
+      select: [
+        'email',
+        'password',
+        'userId',
+        'createdAt',
+        'profileImg',
+        'updatedAt',
+      ],
     });
-    if (!user) throw new NotFoundException(`아이디가 ${userId}인 유저를 찾을 수 없습니다.`);
+    if (!user)
+      throw new NotFoundException(
+        `아이디가 ${userId}인 유저를 찾을 수 없습니다.`,
+      );
     return user;
   }
 
@@ -100,7 +123,10 @@ export class UserService {
       where: { email },
       select: ['email', 'password', 'userId'],
     });
-    if (!user) throw new NotFoundException(`${email}에 해당하는 유저를 찾을 수 없습니다.`);
+    if (!user)
+      throw new NotFoundException(
+        `${email}에 해당하는 유저를 찾을 수 없습니다.`,
+      );
     return user;
   }
 }

@@ -7,10 +7,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.startegy';
-import { UserModule } from 'src/user/user.module';
-import { AwsModule } from 'src/aws/aws.module';
-import { UtilsModule } from 'src/utils/utils.module';
-import { UserService } from 'src/user/user.service';
+import { UserModule } from '../user/user.module';
+import { AwsModule } from '../aws/aws.module';
+import { UtilsModule } from '../utils/utils.module';
+import { UserService } from '../user/user.service';
+import { Boards } from '../boards/entities/board.entity';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt', session: false }),
@@ -24,7 +25,7 @@ import { UserService } from 'src/user/user.service';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Users]),
+    TypeOrmModule.forFeature([Users, Boards]),
     forwardRef(() => UserModule),
     AwsModule,
     UtilsModule,

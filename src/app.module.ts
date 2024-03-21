@@ -5,9 +5,8 @@ import { AppService } from './app.service';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CardModule } from './card/card.module';
+import { BoardsModule } from './boards/boards.module';
 import { AuthModule } from './auth/auth.module';
-
-import { Users } from './user/entities/users.entity';
 import { UserModule } from './user/user.module';
 import { AwsModule } from './aws/aws.module';
 import { UtilsModule } from './utils/utils.module';
@@ -16,17 +15,19 @@ import { Columns } from './column/entities/column.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 
 const typeOrmModuleOptions = {
-  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
+  useFactory: async (
+    configService: ConfigService,
+  ): Promise<TypeOrmModuleOptions> => ({
     type: 'mysql',
     host: configService.get<string>('DB_HOST'),
-    port: configService.get('DB_PORT'),
+
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-
-    entities: [Users, Columns],
-
+    autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
+    //entities: [User, Boards],
     synchronize: configService.get('DB_SYNC'),
+    logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
   }),
   inject: [ConfigService],
 };
@@ -46,6 +47,7 @@ const typeOrmModuleOptions = {
     }),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     CardModule,
+    BoardsModule,
     AuthModule,
     UserModule,
     AwsModule,
