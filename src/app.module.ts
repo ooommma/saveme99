@@ -11,9 +11,13 @@ import { UserModule } from './user/user.module';
 import { AwsModule } from './aws/aws.module';
 import { UtilsModule } from './utils/utils.module';
 import { ColumnModule } from './column/column.module';
+import { Columns } from './column/entities/column.entity';
+import { CacheModule } from '@nestjs/cache-manager';
 
 const typeOrmModuleOptions = {
-  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
+  useFactory: async (
+    configService: ConfigService,
+  ): Promise<TypeOrmModuleOptions> => ({
     type: 'mysql',
     host: configService.get<string>('DB_HOST'),
 
@@ -49,6 +53,10 @@ const typeOrmModuleOptions = {
     AwsModule,
     UtilsModule,
     ColumnModule,
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 1000 * 60 * 5,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -16,7 +16,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/auth/decorator/get-user.decorator';
+import { GetUser } from '../auth/decorator/get-user.decorator';
 import { Users } from './entities/users.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -37,7 +37,10 @@ export class UserController {
   }
   @UseGuards(AuthGuard('jwt'))
   @Delete('/:userId')
-  async deleteUser(@Param('userId') userId: number, @GetUser() user: Users): Promise<string> {
+  async deleteUser(
+    @Param('userId') userId: number,
+    @GetUser() user: Users,
+  ): Promise<string> {
     return await this.userService.deleteUser(userId, user);
   }
 }

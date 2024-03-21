@@ -6,6 +6,12 @@ import { Repository } from 'typeorm';
 import { Cards } from '../card/entities/card.entity';
 import { CreateCardDto } from './dto/create_card.dto';
 import { UpdateCardDto } from './dto/update_card.dto';
+// import { find } from 'lodash';
+
+const MIN_ORDER_INCREMENT = 0.0625;
+const INITIAL_ORDER = 8192;
+const LAST_CARD_MULTIPLIER = 1.1;
+const DECIMAL_PRECISION = 0.001;
 
 @Injectable()
 export class CardService {
@@ -14,8 +20,15 @@ export class CardService {
     private cardsRepository: Repository<Cards>,
   ) {}
 
-  async getAllCards(columnId: number): Promise<Cards[]> {
-    return await this.cardsRepository.find({ where: { columnId: columnId } });
+  async getAllCards(columnId: number, orderValue: string): Promise<Cards[]> {
+    console.log(orderValue);
+    const orderOptions = orderValue ? { order: { [orderValue]: 'ASC' } } : {};
+    console.log(orderOptions);
+
+    return await this.cardsRepository.find({
+      where: { columnId: columnId },
+      ...orderOptions,
+    });
   }
 
   async findOneCards(columnId: number, cardId: number): Promise<Cards> {
@@ -32,6 +45,18 @@ export class CardService {
     columnId: number,
     createCardDto: CreateCardDto,
   ): Promise<Cards> {
+    const cards = await this.cardsRepository.find({
+      where: {
+        columnId,
+      },
+    });
+    console.log(cards);
+    let order: number;
+    if (cards.length === 0) {
+      order = 65536;
+    } else {
+      order = cards[cards.length - 1].order * 2;
+    }
     const createCardDate = new Date();
     createCardDate.setHours(0, 0, 0, 0);
 
@@ -47,6 +72,7 @@ export class CardService {
     const newCard = this.cardsRepository.create({
       ...createCardDto,
       columnId,
+      order: order,
     });
     await this.cardsRepository.save(newCard);
     return newCard;
@@ -93,54 +119,82 @@ export class CardService {
     await this.cardsRepository.delete({ cardId: cardId, columnId: columnId });
   }
 
-  // async moveCard(moveCardId: number, betweenCards: number[]) {
-  //   //일단 betweenCards의 length가 2개일 경우의 로직
-  //   const findCard = await this.cardRepository.findOneBy({ cardId: moveCardId });
-  //   if (!findCard) {
-  //     throw new NotFoundException('해당 카드를 찾을 수 없습니다.');
-  //   }
-  //   const betCardsPos = await Promise.all(
-  //     betweenCards.map(async (cardId) => {
-  //       const card = await this.cardRepository.findOneBy({ cardId });
-  //       return card;
-  //     }),
-  //   ); // pos 순서값
-  //   const cardToMovePos = (betCardsPos[0].pos + betCardsPos[1].pos) / 2;
+  async moveCard(columnId: number, moveCardId: number, cards) {
+    const { betweenCards } = cards;
 
-  //   if (cardToMovePos <= 0.0625) {
-  //     const allCards = await this.getAllCards(findCard.columnId);
-  //     let newPos = 65536;
-  //     for (const card of allCards.slice(1)) {
-  //       await this.cardRepository.update(card.cardId, { pos: newPos });
-  //       newPos *= 1.1;
-  //     }
-  //   }
+    // 카드 찾기
+    const findCard = await this.cardsRepository.findOneBy({
+      cardId: moveCardId,
+      columnId,
+    });
 
-  //   const cardToMoveDao = { cardId: moveCardId, pos: cardToMovePos };
+    if (!findCard) {
+      throw new NotFoundException('해당 카드를 찾을 수 없습니다.');
+    }
 
-  //   const movedCard = await this.cardRepository.update(findCard.cardId, {
-  //     pos: cardToMovePos,
-  //   });
+    const allCards = await this.getAllCards(findCard.columnId, 'order');
 
-  //   //만약 betweenCards의 length가 1이라면
-  //   //일단 1인 경우는 처음 아니면 마지막 밖에 없기 때문에 일단 검색
-  //   const allCards = await this.getAllCards(findCard.columnId);
-  //   orderby: pos;
-  //   //만약 모든 카드들 중 첫번째와 betweenCards의 아이디 값이 같다면
-  //   if (allCards[0].cardId === betweenCards[0]) {
-  //     //모든 카드들 중 첫번째 카드의 값이 0.0625 이하이고, 카드 ID가 일치하지 않는다면
-  //     if (allCards[0].pos <= 0.0625 && findCard.cardId !== allCards[0].cardId) {
-  //       findCard.pos = 8192; // 이동하려는 카드의 pos 초기화
-  //       allCards[0].pos = allCards[1].pos / 2;
-  //       //그래도 아직 0.0625보다는 큰 경우
-  //     } else if (allCards[0].pos > 0.0625 && findCard.cardId !== allCards[0].cardId) {
-  //       let curPos = allCards[0].pos;
-  //       allCards[0].pos = allCards[1].pos / 2;
-  //       findCard.pos = curPos / 2; // 이동하려는 카드의 pos 조정
-  //     }
-  //     //만약 모든 카드들 중 마지막과 betweenCards의 아이디 값이 같다면
-  //   } else if (allCards[allCards.length - 1].cardId === betweenCards[0]) {
-  //     findCard.pos = allCards[allCards.length - 1].pos * 1.1;
-  //   }
-  // }
+    // betweenCards.length가 1인 경우의 로직
+    if (betweenCards.length === 1) {
+      this.OrderForSingleBetweenCard(findCard, betweenCards[0], allCards);
+    } else {
+      // betweenCards.length가 1이 아닌 경우의 로직
+      await this.OrderForMultipleBetweenCards(findCard, betweenCards, columnId);
+    }
+
+    // 카드 순서 업데이트
+    await this.cardsRepository.update(findCard.cardId, {
+      order: findCard.order,
+    });
+  }
+
+  async OrderForSingleBetweenCard(
+    findCard: Cards,
+    betweenCardId: number,
+    allCards: Cards[],
+  ) {
+    if (allCards[0].cardId === betweenCardId) {
+      if (
+        allCards[0].order <= MIN_ORDER_INCREMENT &&
+        findCard.cardId !== allCards[0].cardId
+      ) {
+        findCard.order = INITIAL_ORDER;
+      } else if (findCard.cardId !== allCards[0].cardId) {
+        findCard.order = allCards[0].order / 2;
+      }
+    } else if (allCards[allCards.length - 1].cardId === betweenCardId) {
+      findCard.order =
+        allCards[allCards.length - 1].order * LAST_CARD_MULTIPLIER;
+    }
+  }
+
+  async OrderForMultipleBetweenCards(
+    findCard: Cards,
+    betweenCards: number[],
+    columnId: number,
+  ) {
+    const betweenCardOrders = await Promise.all(
+      betweenCards.map((cardId) =>
+        this.cardsRepository.findOneBy({ cardId, columnId }),
+      ),
+    );
+
+    if (betweenCardOrders.some((card) => !card)) {
+      throw new NotFoundException('하나 이상의 카드를 찾을 수 없습니다.');
+    }
+
+    let newOrder =
+      (betweenCardOrders[0].order + betweenCardOrders[1].order) / 2;
+    const decimal = newOrder % 1;
+
+    if (decimal !== 0) {
+      if (decimal < MIN_ORDER_INCREMENT) {
+        newOrder = Math.floor(newOrder) + 1;
+      } else if (decimal % MIN_ORDER_INCREMENT !== 0) {
+        newOrder = Math.floor(newOrder) + Number(decimal.toFixed(3));
+      }
+    }
+
+    findCard.order = newOrder;
+  }
 }

@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { UserService } from 'src/user/user.service';
-import { UtilsService } from 'src/utils/utils.service';
-import { AwsService } from 'src/aws/aws.service';
+import { UserService } from '../user/user.service';
+import { UtilsService } from '../utils/utils.service';
+import { AwsService } from '../aws/aws.service';
 import { Repository } from 'typeorm';
-import { Users } from 'src/user/entities/users.entity';
+import { Users } from '../user/entities/users.entity';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Readable } from 'stream';
-import { UserDto } from 'src/user/dto/user-dto';
+import { UserDto } from '../user/dto/user-dto';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { UserLoginDto } from './dto/log-in-dto';
 import { hash } from 'bcrypt';
@@ -133,7 +133,9 @@ describe('AuthService', () => {
       mockUserRepository.save.mockResolvedValue(mockSavedUser);
       const result = await authService.createUser(createUserDto, mockFile);
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ email: createUserDto.email });
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({
+        email: createUserDto.email,
+      });
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         userId: mockSavedUser.userId,
@@ -147,7 +149,9 @@ describe('AuthService', () => {
       mockUserRepository.save.mockResolvedValue(mockSavedUser);
       const result = await authService.createUser(createUserDto, undefined);
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ email: createUserDto.email });
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({
+        email: createUserDto.email,
+      });
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         userId: mockSavedUser.userId,
@@ -165,7 +169,9 @@ describe('AuthService', () => {
       }
 
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ email: createUserDto.email });
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({
+        email: createUserDto.email,
+      });
     });
   });
   describe('logIn Method', () => {
@@ -184,10 +190,16 @@ describe('AuthService', () => {
         userId: 1,
       };
       const signOptions = { expiresIn: 1000 * 60 * 60 };
-      mockUserService.findUserByEmailWithPassword.mockResolvedValue(mockFindUser);
+      mockUserService.findUserByEmailWithPassword.mockResolvedValue(
+        mockFindUser,
+      );
       const result = await authService.logIn(userLoginDto, null);
-      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledTimes(1);
-      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledWith(userLoginDto.email);
+      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledWith(
+        userLoginDto.email,
+      );
       expect(mockJwtService.sign).toHaveBeenCalledTimes(2);
       expect(mockJwtService.sign).toHaveBeenLastCalledWith(
         { userId: mockFindUser.userId },
@@ -201,15 +213,21 @@ describe('AuthService', () => {
         email: 'popcon940620@gmail.com',
         password: 'did not match password',
       };
-      mockUserService.findUserByEmailWithPassword.mockResolvedValue(mockFindUser);
+      mockUserService.findUserByEmailWithPassword.mockResolvedValue(
+        mockFindUser,
+      );
       try {
         await authService.logIn(userLoginDto, null);
       } catch (err) {
         expect(err).toBeInstanceOf(UnauthorizedException);
         expect(err.message).toEqual('비밀번호를 다시 확인해주세요.');
       }
-      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledTimes(1);
-      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledWith(userLoginDto.email);
+      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockUserService.findUserByEmailWithPassword).toHaveBeenCalledWith(
+        userLoginDto.email,
+      );
       expect(mockJwtService.sign).toHaveBeenCalledTimes(0);
     });
   });
@@ -235,7 +253,11 @@ describe('AuthService', () => {
       };
       expect(mockUtilsService.getUUID).toHaveBeenCalledTimes(1);
       expect(mockAwsService.imageUploadToS3).toHaveBeenCalledTimes(1);
-      expect(mockAwsService.imageUploadToS3).toHaveBeenCalledWith(`uuid string.txt`, mockFile, 'txt');
+      expect(mockAwsService.imageUploadToS3).toHaveBeenCalledWith(
+        `uuid string.txt`,
+        mockFile,
+        'txt',
+      );
     });
   });
 });

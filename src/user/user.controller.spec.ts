@@ -36,6 +36,8 @@ const mockUser: Users = {
   profileImg: null,
   createdAt: new Date(),
   updatedAt: new Date(),
+  board: [],
+  invitedBoards: [],
 };
 
 describe('UserController', () => {
@@ -78,9 +80,19 @@ describe('UserController', () => {
 
       mockUserService.updateUser.mockResolvedValue(updateUserReturnVal);
 
-      const user = await userController.updateUser(updateUserDto, mockUser, 1, mockFile);
+      const user = await userController.updateUser(
+        updateUserDto,
+        mockUser,
+        1,
+        mockFile,
+      );
 
-      expect(mockUserService.updateUser).toHaveBeenCalledWith(updateUserDto, mockUser, 1, mockFile);
+      expect(mockUserService.updateUser).toHaveBeenCalledWith(
+        updateUserDto,
+        mockUser,
+        1,
+        mockFile,
+      );
       expect(mockUserService.updateUser).toHaveBeenCalledTimes(1);
       expect(user).toEqual(updateUserReturnVal);
     });
