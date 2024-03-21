@@ -48,14 +48,6 @@ export class CardController {
   ) {
     return this.cardService.updateCard(columnId, cardId, updateCardDto);
   }
-  // @Patch(':cardId')
-  // async update(
-  //   @Param('columnId') columnId: number,
-  //   @Param('cardId') cardId: number,
-  //   updateCardDto: UpdateCardDto,
-  // ) {
-  //   return this.cardService.updateCard(columnId, cardId, updateCardDto);
-  // } 왜 안되지? ㄷㄷ
 
   @Delete(':cardId')
   async deleteCard(

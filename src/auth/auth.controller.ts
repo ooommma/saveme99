@@ -21,7 +21,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/get-user.decorator';
 import { Users } from '../user/entities/users.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('유저 정보')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -35,10 +37,7 @@ export class AuthController {
 
   @Post('/login')
   async logIn(@Body() UserLoginDto: UserLoginDto, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.logIn(
-      UserLoginDto,
-      res,
-    );
+    const { accessToken, refreshToken } = await this.authService.logIn(UserLoginDto, res);
     if (!accessToken || !refreshToken) {
       throw new UnauthorizedException();
     }
