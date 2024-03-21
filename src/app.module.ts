@@ -7,12 +7,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CardModule } from './card/card.module';
 import { BoardsModule } from './boards/boards.module';
 import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { AwsModule } from './aws/aws.module';
+import { UtilsModule } from './utils/utils.module';
+import { ColumnModule } from './column/column.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
     type: 'mysql',
     host: configService.get<string>('DB_HOST'),
-    port: configService.get('DB_PORT'),
+
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
@@ -41,6 +45,10 @@ const typeOrmModuleOptions = {
     CardModule,
     BoardsModule,
     AuthModule,
+    UserModule,
+    AwsModule,
+    UtilsModule,
+    ColumnModule,
   ],
   controllers: [AppController],
   providers: [AppService],

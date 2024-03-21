@@ -13,7 +13,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
-import { User } from 'src/auth/entities/auth.entity';
+import { Users } from 'src/user/entities/users.entity';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { InviteDto } from './dto/invite-board.dto';
@@ -30,7 +30,7 @@ export class BoardsController {
    * @returns
    */
   @Post()
-  async create(@GetUser() user: User, @Body() createBoardDto: CreateBoardDto) {
+  async create(@GetUser() user: Users, @Body() createBoardDto: CreateBoardDto) {
     const data = await this.boardsService.create(user, createBoardDto);
 
     return {
@@ -45,7 +45,7 @@ export class BoardsController {
    * @returns
    */
   @Get()
-  async findAll(@GetUser() user: User) {
+  async findAll(@GetUser() user: Users) {
     const userId = user.userId;
     const data = await this.boardsService.findAll(userId);
 
@@ -61,7 +61,7 @@ export class BoardsController {
    * @returns
    */
   @Get(':boardId')
-  async findOne(@GetUser() user: User, @Param('boardId') id: string) {
+  async findOne(@GetUser() user: Users, @Param('boardId') id: string) {
     const userId = user.userId;
     const data = await this.boardsService.findOne(userId, +id);
 
@@ -78,7 +78,11 @@ export class BoardsController {
    * @returns
    */
   @Patch(':boardId')
-  async update(@GetUser() user: User, @Param('boardId') id: string, @Body() createBoardDto: CreateBoardDto) {
+  async update(
+    @GetUser() user: Users,
+    @Param('boardId') id: string,
+    @Body() createBoardDto: CreateBoardDto,
+  ) {
     const userId = user.userId;
     const isUserBoard = await this.boardsService.isUserBoard(userId, +id);
     if (!isUserBoard) {
@@ -99,7 +103,7 @@ export class BoardsController {
    * @returns
    */
   @Delete(':boardId')
-  async remove(@GetUser() user: User, @Param('boardId') id: string) {
+  async remove(@GetUser() user: Users, @Param('boardId') id: string) {
     await this.boardsService.remove(user, +id);
 
     return {

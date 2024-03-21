@@ -1,4 +1,4 @@
-import { User } from 'src/auth/entities/auth.entity';
+import { Users } from 'src/user/entities/users.entity';
 import {
   Column,
   CreateDateColumn,
@@ -50,10 +50,10 @@ export class Boards {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @ManyToOne(() => User, (user) => user.board)
-  user: User;
+  @ManyToOne(() => Users, (user) => user.board)
+  user: Users;
 
-  @ManyToMany(() => User, (user) => user.invitedBoards)
+  @ManyToMany(() => Users, (user) => user.invitedBoards)
   @JoinTable()
-  invitedUsers: User[];
+  invitedUsers: Users[];
 }

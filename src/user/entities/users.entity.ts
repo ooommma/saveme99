@@ -11,24 +11,20 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class Users {
   @PrimaryGeneratedColumn()
   userId: number;
 
   @Column({ type: 'varchar', nullable: false, unique: true })
-  @IsString()
   email: string;
 
   @Column({ type: 'varchar', nullable: false, select: false })
-  @IsString()
   password: string;
 
   @Column({ type: 'varchar', nullable: true })
-  @IsString()
   profileImg?: string;
 
   @Column({ type: 'varchar', nullable: false })
-  @IsString()
   name: string;
 
   @CreateDateColumn()

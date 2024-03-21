@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuthController with AuthGuard true createUser Method signUp should be failed by validate 1`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "isEmail": "email must be an email",
+    },
+    "property": "email",
+    "target": CreateUserDto {
+      "email": "popcon940620",
+      "name": "김",
+      "password": "123",
+    },
+    "value": "popcon940620",
+  },
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "minLength": "password must be longer than or equal to 4 characters",
+    },
+    "property": "password",
+    "target": CreateUserDto {
+      "email": "popcon940620",
+      "name": "김",
+      "password": "123",
+    },
+    "value": "123",
+  },
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "minLength": "name must be longer than or equal to 2 characters",
+    },
+    "property": "name",
+    "target": CreateUserDto {
+      "email": "popcon940620",
+      "name": "김",
+      "password": "123",
+    },
+    "value": "김",
+  },
+]
+`;
+
+exports[`AuthController with AuthGuard true login Method UserLoginDto should be failed by validate 1`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "isEmail": "email must be an email",
+    },
+    "property": "email",
+    "target": UserLoginDto {
+      "email": "popcon940620",
+      "password": "123",
+    },
+    "value": "popcon940620",
+  },
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "minLength": "password must be longer than or equal to 4 characters",
+    },
+    "property": "password",
+    "target": UserLoginDto {
+      "email": "popcon940620",
+      "password": "123",
+    },
+    "value": "123",
+  },
+]
+`;
