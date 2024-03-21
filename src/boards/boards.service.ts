@@ -1,26 +1,101 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UseGuards } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/auth/entities/auth.entity';
+import { Repository } from 'typeorm';
 import { CreateBoardDto } from './dto/create-board.dto';
-import { UpdateBoardDto } from './dto/update-board.dto';
+import { Boards } from './entities/board.entity';
 
 @Injectable()
 export class BoardsService {
-  create(createBoardDto: CreateBoardDto) {
-    return 'This action adds a new board';
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Boards) private readonly boardRepository: Repository<Boards>,
+  ) {}
+
+  async create(user: User, createBoardDto: CreateBoardDto) {
+    const board = await this.boardRepository.save({
+      ...createBoardDto,
+      ...user,
+    });
+    return board;
   }
 
-  findAll() {
-    return `This action returns all boards`;
+  async findAll(userId: number) {
+    console.log(userId);
+    return await this.boardRepository.find({
+      where: { userId },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} board`;
+  async findOne(userId: number, id: number) {
+    const findOneBoard = await this.boardRepository.findOne({
+      where: { id, userId },
+      relations: ['invitedUsers'],
+    });
+
+    if (!findOneBoard) {
+      throw new BadRequestException('존재하지 않는 보드입니다.');
+    }
+
+    return {
+      ...findOneBoard,
+      userId,
+    };
   }
 
-  update(id: number, updateBoardDto: UpdateBoardDto) {
-    return `This action updates a #${id} board`;
+  async isUserBoard(userId: number, id: number): Promise<boolean> {
+    const board = await this.boardRepository.findOne({
+      where: { id, userId },
+    });
+    return !!board; // 보드가 존재하면 true, 아니면 false 반환
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} board`;
+  async update(id: number, createBoardDto: CreateBoardDto) {
+    const findBord = await this.boardRepository.findOne({
+      where: { id },
+    });
+
+    if (!findBord) throw new BadRequestException('존재하지 않는 보드입니다.');
+
+    const updateBoard = await this.boardRepository.update({ id }, createBoardDto);
+    return updateBoard;
+  }
+
+  async remove(user: User, id: number) {
+    const findBord = await this.boardRepository.findOne({
+      where: { id },
+    });
+
+    if (!findBord) throw new BadRequestException('존재하지 않는 보드입니다.');
+
+    if (findBord.userId !== user.userId) throw new BadRequestException('삭제할 권한이 없습니다.');
+
+    const deleteBoard = await this.boardRepository.delete({ id });
+
+    return deleteBoard;
+  }
+
+  async findUserByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
+  async inviteUserToBoard(boardId: number, user: User) {
+    const board = await this.boardRepository.findOne({
+      where: { id: boardId },
+      relations: ['invitedUsers'],
+    });
+    if (!board) {
+      throw new BadRequestException('보드가 존재하지 않습니다.');
+    }
+
+    // 이미 초대된 사용자인지 확인
+    const isMember = board.invitedUsers.some((invitedUser) => invitedUser.userId === user.userId);
+    if (isMember) {
+      throw new BadRequestException('이미 보드에 초대된 사용자입니다.');
+    }
+
+    // 초대된 사용자 추가
+    board.invitedUsers.push(user);
+    await this.boardRepository.save(board);
   }
 }

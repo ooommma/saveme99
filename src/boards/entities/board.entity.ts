@@ -1,11 +1,12 @@
-import { IsNotEmpty, IsString } from 'class-validator';
-import { Columns } from 'src/columns/entities/column.entity';
-//import { Users } from 'src/users/entities/user.entity';
+import { User } from 'src/auth/entities/auth.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -17,31 +18,27 @@ export class Boards {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  userId: number;
   /**
    * 보드 이름
    * @example "TODO"
    */
-  @IsNotEmpty({ message: '보드이름을 입력해 주세요' })
-  @IsString()
-  @Column()
+  @Column({ type: 'varchar', nullable: false })
   name: string;
 
   /**
-   * 보드 이름
+   * 보드 색상
    * @example "blue"
    */
-  @IsNotEmpty({ message: '보드색상을  입력해 주세요' })
-  @IsString()
-  @Column()
+  @Column({ type: 'varchar' })
   color: string;
 
   /**
    * 보드 설명
    * @example "해야할 일"
    */
-  @IsNotEmpty({ message: '보드설명을 입력해 주세요' })
-  @IsString()
-  @Column()
+  @Column({ type: 'varchar' })
   description: string;
 
   @CreateDateColumn()
@@ -53,9 +50,10 @@ export class Boards {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  // @ManyToOne(() => Users, (user) => user.board)
-  // user: Users;
+  @ManyToOne(() => User, (user) => user.board)
+  user: User;
 
-  @OneToMany(() => Columns, (column) => column.board, { cascade: true })
-  column: Columns[];
+  @ManyToMany(() => User, (user) => user.invitedBoards)
+  @JoinTable()
+  invitedUsers: User[];
 }
