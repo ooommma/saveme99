@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserController createUser Method signUp should be failed by validate 1`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "minLength": "name must be longer than or equal to 2 characters",
+    },
+    "property": "name",
+    "target": UpdateUserDto {
+      "name": "김",
+    },
+    "value": "김",
+  },
+]
+`;
+
+exports[`UserController updateUser Method updateUser should be failed by validate 1`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "minLength": "name must be longer than or equal to 2 characters",
+    },
+    "property": "name",
+    "target": UpdateUserDto {
+      "name": "김",
+    },
+    "value": "김",
+  },
+]
+`;

@@ -1,15 +1,24 @@
-import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Columns } from './entities/column.entity';
+
 import { Between, LessThan, MoreThan, Not, Repository } from 'typeorm';
+
 import _ from 'lodash';
 
 @Injectable()
 export class ColumnService {
-
-  constructor(@InjectRepository(Columns) private readonly columnRepository: Repository<Columns>) { }
+  constructor(
+    @InjectRepository(Columns)
+    private readonly columnRepository: Repository<Columns>,
+  ) {}
 
   async create(createColumnDto: CreateColumnDto) {
     const { name } = createColumnDto;
@@ -17,7 +26,7 @@ export class ColumnService {
 
     const createcolumn = await this.columnRepository.save({
       name,
-      order: count + 1
+      order: count + 1,
     });
 
     return { createcolumn, count };
@@ -25,8 +34,8 @@ export class ColumnService {
 
   async findAll(): Promise<{ columns: Columns[]; count: number }> {
     const [columns, count] = await this.columnRepository.findAndCount({
-      select: ["id", "boardId", "order", "name", "createdAt", "updatedAt"],
-      order: { order: "ASC" }
+      select: ['id', 'boardId', 'order', 'name', 'createdAt', 'updatedAt'],
+      order: { order: 'ASC' },
     });
 
     return { columns, count };
@@ -41,38 +50,39 @@ export class ColumnService {
     const totalCount = await this.columnRepository.count();
 
     if (_.isNil(findcolumn)) {
-      throw new NotFoundException("존재하지 않는 컬럼입니다");
+      throw new NotFoundException('존재하지 않는 컬럼입니다');
     }
 
     if (newOrder > totalCount) {
-      throw new NotFoundException("order의 수가 잘못되었습니다");
+      throw new NotFoundException('order의 수가 잘못되었습니다');
     }
 
     const currentOrder = findcolumn.order;
 
     if (newOrder < currentOrder) {
       const columnsToUpdate = await this.columnRepository.find({
-        where: { order: Between(newOrder, currentOrder -1)},
-        order: { order: "ASC" }
+        where: { order: Between(newOrder, currentOrder - 1) },
+        order: { order: 'ASC' },
       });
 
-      await Promise.all(columnsToUpdate.map(async (column) => {
-        column.order += 1;
-        await this.columnRepository.save(column);
-      }));
-    }
-
-    else if (newOrder > currentOrder) {
+      await Promise.all(
+        columnsToUpdate.map(async (column) => {
+          column.order += 1;
+          await this.columnRepository.save(column);
+        }),
+      );
+    } else if (newOrder > currentOrder) {
       const columnsToUpdate = await this.columnRepository.find({
-        where: { order: Between(currentOrder+1, newOrder ) },
-        order: { order: "DESC" }
+        where: { order: Between(currentOrder + 1, newOrder) },
+        order: { order: 'DESC' },
       });
 
-      await Promise.all(columnsToUpdate.map(async (column) => {
-        column.order -= 1;
-        await this.columnRepository.save(column);
-      }));
-
+      await Promise.all(
+        columnsToUpdate.map(async (column) => {
+          column.order -= 1;
+          await this.columnRepository.save(column);
+        }),
+      );
     }
 
     findcolumn.name = newName;
@@ -82,26 +92,27 @@ export class ColumnService {
     return updatedColumn;
   }
 
-
   async remove(id: number) {
     const findcolumn = await this.columnRepository.findOneBy({ id });
 
     if (_.isNil(findcolumn)) {
-      throw new NotFoundException("존재하지 않는 컬럼입니다");
+      throw new NotFoundException('존재하지 않는 컬럼입니다');
     }
 
-    const deleteOrder = findcolumn.order
+    const deleteOrder = findcolumn.order;
 
     const allColumns = await this.columnRepository.find({
       where: {
-        order: MoreThan(deleteOrder)
-      }
+        order: MoreThan(deleteOrder),
+      },
     });
 
-    await Promise.all(allColumns.map(async (column) => {
-      column.order -= 1;
-      await this.columnRepository.save(column);
-    }));
+    await Promise.all(
+      allColumns.map(async (column) => {
+        column.order -= 1;
+        await this.columnRepository.save(column);
+      }),
+    );
 
     await this.columnRepository.delete({ id });
 

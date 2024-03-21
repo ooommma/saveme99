@@ -1,13 +1,16 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/auth.entity';
+import { Users } from '../user/entities/users.entity';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.startegy';
-
+import { UserModule } from 'src/user/user.module';
+import { AwsModule } from 'src/aws/aws.module';
+import { UtilsModule } from 'src/utils/utils.module';
+import { UserService } from 'src/user/user.service';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt', session: false }),
@@ -21,10 +24,13 @@ import { JwtStrategy } from './jwt.startegy';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([Users]),
+    forwardRef(() => UserModule),
+    AwsModule,
+    UtilsModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
-  exports: [PassportModule],
+  exports: [PassportModule, AuthService],
 })
 export class AuthModule {}
