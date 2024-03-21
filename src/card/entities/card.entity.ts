@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { CardStatus, ColorStatus } from '../types/card_status.enum';
 import { Columns } from 'src/column/entities/column.entity';
+import { Comments } from '../../comment/entities/comment.entity';
 @Entity({ name: 'cards' })
 export class Cards extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -50,7 +51,6 @@ export class Cards extends BaseEntity {
   @JoinColumn({ name: 'columnId' })
   column: Columns;
 
-  // @OneToMany(() => Comment, (comment) => comment.card)
-  // @JoinColumn({ name: 'commentId' })
-  // comment: Comment;
+  @OneToMany(() => Comments, (comment) => comment.cards)
+  comments: Comments;
 }
