@@ -106,4 +106,16 @@ export class BoardsService {
     board.invitedUsers.push(user);
     await this.boardRepository.save(board);
   }
+
+  async getInviteUsers(boardId: number): Promise<Users[]> {
+    const board = await this.boardRepository.findOne({
+      where: { id: boardId },
+      relations: ['invitedUsers'],
+    });
+
+    if (!board) {
+      throw new BadRequestException('보드에 초대된 사용자 목록이 없습니다.');
+    }
+    return board.invitedUsers;
+  }
 }
