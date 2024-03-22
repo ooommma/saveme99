@@ -1,11 +1,10 @@
-import { Columns } from '../../column/entities/column.entity';
-import { Users } from '../../user/entities/users.entity';
+import { Columns } from 'src/column/entities/column.entity';
+import { Users } from 'src/user/entities/users.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -45,9 +44,13 @@ export class Boards {
   deletedAt?: Date;
   @ManyToOne(() => Users, (user) => user.board)
   user: Users;
+
   @ManyToMany(() => Users, (user) => user.invitedBoards)
   @JoinTable()
   invitedUsers: Users[];
-  @OneToMany(() => Columns, (column) => column.boards)
-  column: Columns;
+
+  @OneToMany(() => Columns, (columns) => columns.boards, {
+    onDelete: 'CASCADE',
+  })
+  columns: Columns;
 }

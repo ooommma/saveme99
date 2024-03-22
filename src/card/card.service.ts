@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +6,9 @@ import { Repository } from 'typeorm';
 import { Cards } from '../card/entities/card.entity';
 import { CreateCardDto } from './dto/create_card.dto';
 import { UpdateCardDto } from './dto/update_card.dto';
-import { find } from 'lodash';
+import { BoardsService } from 'src/boards/boards.service';
+import { ColumnService } from 'src/column/column.service';
+// import { find } from 'lodash';
 
 const MIN_ORDER_INCREMENT = 0.0625;
 const INITIAL_ORDER = 8192;
@@ -18,6 +20,10 @@ export class CardService {
   constructor(
     @InjectRepository(Cards)
     private cardsRepository: Repository<Cards>,
+    @Inject(BoardsService)
+    private readonly boardService: BoardsService,
+    @Inject(ColumnService)
+    private readonly columnService: ColumnService,
   ) {}
 
   async getAllCards(columnId: number, orderValue: string): Promise<Cards[]> {
@@ -85,6 +91,7 @@ export class CardService {
   ): Promise<Cards> {
     const card = await this.cardsRepository.findOne({
       where: { cardId: cardId, columnId: columnId },
+      relations: ['column'],
     });
 
     if (!card) {
@@ -93,7 +100,6 @@ export class CardService {
 
     const createCardDate = new Date();
     createCardDate.setHours(0, 0, 0, 0);
-
     const endDate = new Date(updateCardDto.endDate);
     endDate.setHours(0, 0, 0, 0);
 
@@ -103,6 +109,18 @@ export class CardService {
       );
     }
 
+    // 보드에 초대된 사용자 목록 조회
+    const boardId = card.column.boardId; // 카드가 속한 컬럼에서 보드 Id 가져오기
+    const invitedUsers = await this.boardService.getInviteUsers(boardId); // 의존성주입
+
+    if (
+      updateCardDto.workerId &&
+      !invitedUsers.some((user) => user.userId === updateCardDto.workerId)
+    ) {
+      throw new BadRequestException('이 유저는 이 보드에 초대된 멤버 아닙니다');
+    }
+
+    // worker Id 유효하면 할당하기
     const updatedCard = this.cardsRepository.merge(card, updateCardDto);
     await this.cardsRepository.save(updatedCard);
 

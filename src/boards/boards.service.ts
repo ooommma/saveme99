@@ -72,8 +72,9 @@ export class BoardsService {
 
     if (!findBord) throw new BadRequestException('존재하지 않는 보드입니다.');
 
-    if (findBord.userId !== user.userId)
+    if (findBord.userId !== user.userId) {
       throw new BadRequestException('삭제할 권한이 없습니다.');
+    }
 
     const deleteBoard = await this.boardRepository.delete({ id });
 
@@ -104,5 +105,17 @@ export class BoardsService {
     // 초대된 사용자 추가
     board.invitedUsers.push(user);
     await this.boardRepository.save(board);
+  }
+
+  async getInviteUsers(boardId: number): Promise<Users[]> {
+    const board = await this.boardRepository.findOne({
+      where: { id: boardId },
+      relations: ['invitedUsers'],
+    });
+
+    if (!board) {
+      throw new BadRequestException('보드에 초대된 사용자 목록이 없습니다.');
+    }
+    return board.invitedUsers;
   }
 }
