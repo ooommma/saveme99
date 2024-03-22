@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Comments } from '../../comment/entities/comment.entity';
 
 @Entity()
 export class Users {
@@ -35,6 +36,9 @@ export class Users {
 
   @OneToMany(() => Boards, (board) => board.user)
   board: Boards[];
+
+  @OneToMany(() => Comments, (comment) => comment.user)
+  comments: Comments[];
 
   @ManyToMany(() => Boards, (board) => board.invitedUsers)
   invitedBoards: Boards[];

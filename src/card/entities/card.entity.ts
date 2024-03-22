@@ -4,11 +4,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { CardStatus, ColorStatus } from '../types/card_status.enum';
 import { Columns } from 'src/column/entities/column.entity';
+import { Comments } from 'src/comment/entities/comment.entity';
 
 @Entity({ name: 'cards' })
 export class Cards extends BaseEntity {
@@ -51,7 +53,6 @@ export class Cards extends BaseEntity {
   @ManyToOne(() => Columns, (Column) => Column.cards, { onDelete: 'CASCADE' })
   column: Columns;
 
-  //   @OneToMany(() => Comment, (comment) => comment.card)
-  //   @JoinColumn({ name: 'commentId' })
-  //   comment: Comment;
+  @OneToMany(() => Comments, (comment) => comment.cards)
+  comments: Comments;
 }

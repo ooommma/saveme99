@@ -13,6 +13,7 @@ import { UtilsModule } from './utils/utils.module';
 import { ColumnModule } from './column/column.module';
 import { Columns } from './column/entities/column.entity';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CommentModule } from './comment/comment.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -25,7 +26,6 @@ const typeOrmModuleOptions = {
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
     autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
-    //entities: [User, Boards],
     synchronize: configService.get('DB_SYNC'),
     logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
   }),
@@ -57,6 +57,7 @@ const typeOrmModuleOptions = {
       isGlobal: true,
       ttl: 1000 * 60 * 5,
     }),
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
