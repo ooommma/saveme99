@@ -1,5 +1,3 @@
-
-import { IsString } from 'class-validator';
 import { Boards } from '../../boards/entities/board.entity';
 
 import {

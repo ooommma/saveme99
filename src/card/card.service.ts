@@ -20,10 +20,8 @@ export class CardService {
   constructor(
     @InjectRepository(Cards)
     private cardsRepository: Repository<Cards>,
-
     @InjectRepository(Columns)
     private columnRepository: Repository<Columns>,
-
     @Inject(BoardsService)
     private readonly boardService: BoardsService,
     @Inject(ColumnService)
