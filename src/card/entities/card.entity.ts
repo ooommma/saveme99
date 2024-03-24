@@ -3,15 +3,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { CardStatus, ColorStatus } from '../types/card_status.enum';
-import { Columns } from 'src/column/entities/column.entity';
+import { Columns } from '../../column/entities/column.entity';
 import { Comments } from '../../comment/entities/comment.entity';
+
 @Entity({ name: 'cards' })
 export class Cards extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -22,6 +22,9 @@ export class Cards extends BaseEntity {
 
   @Column()
   columnId: number;
+
+  @Column()
+  userId: number;
 
   @Column({ type: 'varchar', nullable: false })
   name: string;
@@ -47,8 +50,7 @@ export class Cards extends BaseEntity {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Columns, (Column) => Column.cards)
-  @JoinColumn({ name: 'columnId' })
+  @ManyToOne(() => Columns, (Column) => Column.cards, { onDelete: 'CASCADE' })
   column: Columns;
 
   @OneToMany(() => Comments, (comment) => comment.cards)

@@ -10,6 +10,7 @@ import { Users } from '../user/entities/users.entity';
   imports: [TypeOrmModule.forFeature([Boards, Users])],
   controllers: [BoardsController],
   providers: [BoardsService],
-  exports: [BoardsModule],
+  // cardservice에서 boardService를 쓰기 위해 BoardsService를 export 해준다
+  exports: [BoardsService],
 })
 export class BoardsModule {}

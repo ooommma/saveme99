@@ -60,6 +60,7 @@ const mockUser: Users = {
   updatedAt: new Date(),
   board: [],
   invitedBoards: [],
+  comments: [],
 };
 
 let canActivateVal = true;

@@ -18,7 +18,7 @@ import { UpdateCardDto } from './dto/update_card.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller(':columnId/cards')
+@Controller('/columns/:columnId/cards')
 export class CardController {
   constructor(private cardService: CardService) {}
 

@@ -1,12 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Column, Repository } from 'typeorm';
 import { Cards } from '../card/entities/card.entity';
 import { CreateCardDto } from './dto/create_card.dto';
 import { UpdateCardDto } from './dto/update_card.dto';
-import { find } from 'lodash';
+import { Columns } from '../column/entities/column.entity';
+import { BoardsService } from 'src/boards/boards.service';
+import { ColumnService } from 'src/column/column.service';
 
 const MIN_ORDER_INCREMENT = 0.0625;
 const INITIAL_ORDER = 8192;
@@ -18,12 +20,18 @@ export class CardService {
   constructor(
     @InjectRepository(Cards)
     private cardsRepository: Repository<Cards>,
+
+    @InjectRepository(Columns)
+    private columnRepository: Repository<Columns>,
+
+    @Inject(BoardsService)
+    private readonly boardService: BoardsService,
+    @Inject(ColumnService)
+    private readonly columnService: ColumnService,
   ) {}
 
   async getAllCards(columnId: number, orderValue: string): Promise<Cards[]> {
-    console.log(orderValue);
     const orderOptions = orderValue ? { order: { [orderValue]: 'ASC' } } : {};
-    console.log(orderOptions);
 
     return await this.cardsRepository.find({
       where: { columnId: columnId },
@@ -50,7 +58,17 @@ export class CardService {
         columnId,
       },
     });
-    console.log(cards);
+    if (!cards) {
+      throw new NotFoundException('해당 카드를 찾을 수 없습니다.');
+    }
+    const isColumnExist = await this.columnRepository.exists({
+      where: {
+        id: columnId,
+      },
+    });
+    if (!isColumnExist) {
+      throw new NotFoundException('해당 컬럼을 찾을 수 없습니다.');
+    }
     let order: number;
     if (cards.length === 0) {
       order = 65536;
@@ -85,6 +103,7 @@ export class CardService {
   ): Promise<Cards> {
     const card = await this.cardsRepository.findOne({
       where: { cardId: cardId, columnId: columnId },
+      relations: ['column'],
     });
 
     if (!card) {
@@ -93,7 +112,6 @@ export class CardService {
 
     const createCardDate = new Date();
     createCardDate.setHours(0, 0, 0, 0);
-
     const endDate = new Date(updateCardDto.endDate);
     endDate.setHours(0, 0, 0, 0);
 
@@ -103,6 +121,18 @@ export class CardService {
       );
     }
 
+    // 보드에 초대된 사용자 목록 조회
+    const boardId = card.column.boardId; // 카드가 속한 컬럼에서 보드 Id 가져오기
+    const invitedUsers = await this.boardService.getInviteUsers(boardId); // 의존성주입
+
+    if (
+      updateCardDto.workerId &&
+      !invitedUsers.some((user) => user.userId === updateCardDto.workerId)
+    ) {
+      throw new BadRequestException('이 유저는 이 보드에 초대된 멤버 아닙니다');
+    }
+
+    // worker Id 유효하면 할당하기
     const updatedCard = this.cardsRepository.merge(card, updateCardDto);
     await this.cardsRepository.save(updatedCard);
 

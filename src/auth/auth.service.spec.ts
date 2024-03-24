@@ -161,12 +161,11 @@ describe('AuthService', () => {
     });
     it('createUser method should be already Exist User ', async () => {
       mockUserRepository.findOneBy.mockResolvedValue('exist user');
-      try {
-        await authService.createUser(createUserDto, mockFile);
-      } catch (err) {
-        expect(err).toBeInstanceOf(ConflictException);
-        expect(err.message).toEqual('이미 회원가입한 이메일입니다.');
-      }
+      expect
+
+      await expect(
+        authService.createUser(createUserDto, mockFile),
+      ).rejects.toThrow(ConflictException);
 
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({

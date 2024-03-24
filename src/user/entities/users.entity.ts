@@ -1,5 +1,7 @@
+
 import { IsString } from 'class-validator';
-import { Boards } from 'src/boards/entities/board.entity';
+import { Boards } from '../../boards/entities/board.entity';
+
 import {
   Column,
   CreateDateColumn,

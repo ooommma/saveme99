@@ -38,6 +38,7 @@ const mockUser: Users = {
   updatedAt: new Date(),
   board: [],
   invitedBoards: [],
+  comments: [],
 };
 
 describe('UserController', () => {

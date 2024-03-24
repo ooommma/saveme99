@@ -1,29 +1,36 @@
 import {
   IsDateString,
   IsEnum,
-  IsNotEmpty,
+  IsNumber,
+  IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
 import { CardStatus, ColorStatus } from '../types/card_status.enum';
 
 export class UpdateCardDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: '제목을 적어주세요.' })
   name: string;
 
+  @IsOptional()
   @IsString()
   @MaxLength(100)
-  @IsNotEmpty({ message: '내용을 적어주세요.' })
   description: string;
 
+  @IsOptional()
   @IsDateString()
-  @IsNotEmpty({ message: '마감일을 입력해주세요.' })
   endDate: string;
 
+  @IsOptional()
   @IsEnum(ColorStatus)
   color: ColorStatus;
 
+  @IsOptional()
   @IsEnum(CardStatus)
   status: CardStatus;
+
+  @IsOptional()
+  @IsNumber()
+  workerId?: number;
 }

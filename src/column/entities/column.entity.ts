@@ -5,7 +5,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   // Generated,
   OneToMany,
@@ -23,16 +22,18 @@ export class Columns {
   @Column()
   @IsNumber()
   order: number;
+
   @IsString()
   @Column({ default: 'Done name' })
   name: string;
+
   @CreateDateColumn()
   createdAt: Date;
+
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Boards, (boards) => boards.column, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'boardId' })
+  @ManyToOne(() => Boards, (boards) => boards.columns, { onDelete: 'CASCADE' })
   boards: Boards;
 
   @OneToMany(() => Cards, (card) => card.column)

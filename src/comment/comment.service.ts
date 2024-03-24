@@ -62,7 +62,7 @@ export class CommentService {
     return comments;
   }
 
-  async findOne(commentId: number, cardId: number) {
+  async findOneComment(commentId: number, cardId: number) {
     const comment = await this.commentRepository.findOne({
       where: {
         cardId,
@@ -122,6 +122,6 @@ export class CommentService {
       throw new InternalServerErrorException();
     }
 
-    return `성공적으로 업데이트 하였습니다.`;
+    return `성공적으로 삭제 하였습니다.`;
   }
 }
