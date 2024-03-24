@@ -3,8 +3,8 @@ import { CardController } from './card.controller';
 import { CardService } from './card.service';
 import { Cards } from './entities/card.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BoardsModule } from 'src/boards/boards.module';
-import { ColumnModule } from 'src/column/column.module';
+import { BoardsModule } from '../boards/boards.module';
+import { ColumnModule } from '../column/column.module';
 
 import { Columns } from '../column/entities/column.entity';
 

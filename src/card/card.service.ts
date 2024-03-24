@@ -7,8 +7,8 @@ import { Cards } from '../card/entities/card.entity';
 import { CreateCardDto } from './dto/create_card.dto';
 import { UpdateCardDto } from './dto/update_card.dto';
 import { Columns } from '../column/entities/column.entity';
-import { BoardsService } from 'src/boards/boards.service';
-import { ColumnService } from 'src/column/column.service';
+import { BoardsService } from '../boards/boards.service';
+import { ColumnService } from '../column/column.service';
 
 const MIN_ORDER_INCREMENT = 0.0625;
 const INITIAL_ORDER = 8192;

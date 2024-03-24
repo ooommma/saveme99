@@ -21,7 +21,6 @@ export const typeOrmModuleOptions = {
   ): Promise<TypeOrmModuleOptions> => ({
     type: 'mysql',
     host: configService.get<string>('DB_HOST'),
-
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
@@ -37,7 +36,7 @@ export const typeOrmModuleOptions = {
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: process.env.IS_TEST ? `.env.test` : `.env`,
+      envFilePath: process.env.IS_TEST === 'true' ? `.env.test` : `.env`,
       validationSchema: Joi.object({
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.number().required(),
