@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CardStatus, ColorStatus } from '../types/card_status.enum';
-import { Columns } from 'src/column/entities/column.entity';
-import { Comments } from 'src/comment/entities/comment.entity';
+import { Columns } from '../../column/entities/column.entity';
+import { Comments } from '../../comment/entities/comment.entity';
 
 @Entity({ name: 'cards' })
 export class Cards extends BaseEntity {

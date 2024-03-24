@@ -1,15 +1,10 @@
-import {
-  BadGatewayException,
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Columns } from './entities/column.entity';
 
-import { Between, LessThan, MoreThan, Not, Repository } from 'typeorm';
+import { Between, MoreThan, Repository } from 'typeorm';
 
 import _ from 'lodash';
 

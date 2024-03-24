@@ -22,48 +22,61 @@ export class CommentController {
 
   @HttpCode(201)
   @Post()
-  createComment(
+  async createComment(
     @Body() createCommentDto: CreateCommentDto,
     @GetUser() user: Users,
     @Param('cardId') cardId: number,
   ) {
-    return this.commentService.create(createCommentDto, user, cardId);
+    return await this.commentService.create(createCommentDto, user, cardId);
   }
 
   @Get()
-  findAllComments(@Param('cardId') cardId: number) {
-    return this.commentService.findAll(cardId);
+  async findAllComments(@Param('cardId') cardId: number) {
+    return await this.commentService.findAll(cardId);
   }
 
   @Get(':commentId')
-  findOneComment(
+  async findOneComment(
     @Param('commentId') commentId: number,
     @Param('cardId') cardId: number,
   ) {
-    return this.commentService.findOne(commentId, cardId);
+    return await this.commentService.findOneComment(commentId, cardId);
   }
 
   @Patch(':commentId')
-  updateComment(
+  async updateComment(
     @Param('commentId') commentId: number,
     @Param('cardId') cardId: number,
     @Body() updateCommentDto: UpdateCommentDto,
     @GetUser() user: Users,
   ) {
-    return this.commentService.update(
+    const updatedResult = await this.commentService.update(
       commentId,
       cardId,
       updateCommentDto,
       user,
     );
+    return {
+      statusCode: 200,
+      message: updatedResult,
+    };
   }
 
   @Delete(':commentId')
-  deleteComment(
+  async deleteComment(
     @Param('commentId') commentId: number,
     @Param('cardId') cardId: number,
     @GetUser() user: Users,
   ) {
-    return this.commentService.remove(commentId, cardId, user);
+    const deletedComment = await this.commentService.remove(
+      commentId,
+      cardId,
+      user,
+    );
+
+    return {
+      statusCode: 200,
+      message: deletedComment,
+    };
   }
 }

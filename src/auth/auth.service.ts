@@ -37,6 +37,7 @@ export class AuthService {
   async createUser(createUserDto: CreateUserDto, file: Express.Multer.File) {
     const { email, password } = createUserDto;
     const user: Users | null = await this.userRepository.findOneBy({ email });
+
     if (user) {
       throw new ConflictException('이미 회원가입한 이메일입니다.');
     }

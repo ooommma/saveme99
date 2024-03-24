@@ -15,7 +15,7 @@ import { Columns } from './column/entities/column.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CommentModule } from './comment/comment.module';
 
-const typeOrmModuleOptions = {
+export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
   ): Promise<TypeOrmModuleOptions> => ({
@@ -26,8 +26,9 @@ const typeOrmModuleOptions = {
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
     autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
+    //entities: [User, Boards],
     synchronize: configService.get('DB_SYNC'),
-    logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
+    logging: false, // DB에서 query가 발생할때마다 rawquery가 출력된다.
   }),
   inject: [ConfigService],
 };
@@ -36,6 +37,7 @@ const typeOrmModuleOptions = {
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      // envFilePath: process.env.IS_TEST ? `.env.test` : `.env`,
       validationSchema: Joi.object({
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.number().required(),

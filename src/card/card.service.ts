@@ -2,13 +2,13 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Column, Repository } from 'typeorm';
 import { Cards } from '../card/entities/card.entity';
 import { CreateCardDto } from './dto/create_card.dto';
 import { UpdateCardDto } from './dto/update_card.dto';
+import { Columns } from '../column/entities/column.entity';
 import { BoardsService } from 'src/boards/boards.service';
 import { ColumnService } from 'src/column/column.service';
-// import { find } from 'lodash';
 
 const MIN_ORDER_INCREMENT = 0.0625;
 const INITIAL_ORDER = 8192;
@@ -20,6 +20,8 @@ export class CardService {
   constructor(
     @InjectRepository(Cards)
     private cardsRepository: Repository<Cards>,
+    @InjectRepository(Columns)
+    private columnRepository: Repository<Columns>,
     @Inject(BoardsService)
     private readonly boardService: BoardsService,
     @Inject(ColumnService)
@@ -27,9 +29,7 @@ export class CardService {
   ) {}
 
   async getAllCards(columnId: number, orderValue: string): Promise<Cards[]> {
-    console.log(orderValue);
     const orderOptions = orderValue ? { order: { [orderValue]: 'ASC' } } : {};
-    console.log(orderOptions);
 
     return await this.cardsRepository.find({
       where: { columnId: columnId },
@@ -56,7 +56,17 @@ export class CardService {
         columnId,
       },
     });
-    console.log(cards);
+    if (!cards) {
+      throw new NotFoundException('해당 카드를 찾을 수 없습니다.');
+    }
+    const isColumnExist = await this.columnRepository.exists({
+      where: {
+        id: columnId,
+      },
+    });
+    if (!isColumnExist) {
+      throw new NotFoundException('해당 컬럼을 찾을 수 없습니다.');
+    }
     let order: number;
     if (cards.length === 0) {
       order = 65536;

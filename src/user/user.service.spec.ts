@@ -52,6 +52,7 @@ const mockUser: Users = {
   updatedAt: new Date(),
   board: [],
   invitedBoards: [],
+  comments: [],
 };
 
 const mockUserWithoutPassword = {
