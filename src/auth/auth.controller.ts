@@ -21,7 +21,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/get-user.decorator';
 import { Users } from '../user/entities/users.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { object } from 'joi';
 
 @ApiTags('유저 정보')
 @Controller('auth')
@@ -29,6 +30,24 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: '회원 가입',
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        email: { type: 'string' },
+        password: { type: 'string' },
+
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOperation({ summary: '회원 가입과 프로필 이미지 선택적 업로드' })
   @HttpCode(201)
   @Post('/register')
   async signUp(
@@ -38,10 +57,21 @@ export class AuthController {
     return await this.authService.createUser(createAuthDto, file);
   }
 
+  @ApiBody({
+    description: '로그인',
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        password: { type: 'string' },
+      },
+    },
+  })
+  @ApiOperation({ summary: '로그인' })
   @Post('/login')
-  async logIn(@Body() UserLoginDto: UserLoginDto, @Res() res: Response) {
+  async logIn(@Body() userLoginDto: UserLoginDto, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.logIn(
-      UserLoginDto,
+      userLoginDto,
       res,
     );
     if (!accessToken || !refreshToken) {
@@ -61,6 +91,10 @@ export class AuthController {
     });
     res.status(200).json({ message: '로그인 성공' });
   }
+  /**
+   * 내 정보 조회
+   * @returns
+   */
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   getProfile(@GetUser() user: Users) {
