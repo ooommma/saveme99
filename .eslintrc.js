@@ -21,5 +21,19 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+    'prettier/prettier': [
+      'error',
+      {
+        arrowSpacing: ['error', { before: true, after: true }],
+        singleQuote: true,
+        semi: false,
+        useTabs: false,
+        tabWidth: 2,
+        printWidth: 80,
+        bracketSpacing: true,
+        arrowParens: 'always',
+        endOfLine: 'auto', // 이 부분이 lf로 되어있다면 auto로 변경
+      },
+    ],
   },
 };
